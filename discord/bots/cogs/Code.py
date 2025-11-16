@@ -54,18 +54,20 @@ async def get_languages() -> dict:
                 language_names = set(map(lambda data: data["language"], result))
                 languages_dict = {}
                 for language_name in language_names:
-                    language_information = next(
-                        filter(
-                            lambda language_information: language_information[
-                                "language"
-                            ]
-                            == language_name,
-                            result,
-                        )
-                    )
-                    languages_dict[language_name.lower().replace(" ", "")] = (
-                        language_information["name"]
-                    )
+                    # Find all compilers for this language
+                    compilers = [
+                        item["name"]
+                        for item in result
+                        if item["language"] == language_name
+                    ]
+                    # Prefer stable versions: filter out HEAD, devel, or git versions
+                    stable_compilers = [
+                        c for c in compilers
+                        if "head" not in c.lower() and "devel" not in c.lower() and "git" not in c.lower()
+                    ]
+                    # Use stable version if available, otherwise use the first available
+                    selected = stable_compilers[0] if stable_compilers else compilers[0]
+                    languages_dict[language_name.lower().replace(" ", "")] = selected
     return languages_dict
 
 
@@ -101,15 +103,43 @@ async def run_core(
         "compiler-option-raw": compiler_option,
     }
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=params) as r:
-            if r.status == 200:
-                result = await r.json()
-            else:
-                embed = discord.Embed(
-                    title="Connection Error", description=f"{r.status}", color=0xFF0000
-                )
-                embed.set_author(name=author.name, icon_url=author.display_avatar.url)
-                return embed, None
+        try:
+            async with session.post(url, json=params) as r:
+                if r.status == 200:
+                    try:
+                        # Some responses from Wandbox may omit the Content-Type header.
+                        # Allow parsing JSON even when content-type is missing by setting content_type=None.
+                        result = await r.json(content_type=None)
+                    except ValueError:
+                        # Not JSON — read text for debugging and return error embed.
+                        text = await r.text()
+                        embed = discord.Embed(
+                            title="Wandbox Error",
+                            description=(
+                                "Wandbox returned a non-JSON response. "
+                                "Check the service status or your request."
+                            ),
+                            color=0xFF0000,
+                        )
+                        max_preview = 750
+                        preview = text[:max_preview] + ("..." if len(text) > max_preview else "")
+                        embed.add_field(name="Response Preview", value=f"``\n{preview}\n```")
+                        embed.set_author(name=author.name, icon_url=author.display_avatar.url)
+                        return embed, None
+                else:
+                    embed = discord.Embed(
+                        title="Connection Error", description=f"{r.status}", color=0xFF0000
+                    )
+                    embed.set_author(name=author.name, icon_url=author.display_avatar.url)
+                    return embed, None
+        except aiohttp.ClientError as e:
+            embed = discord.Embed(
+                title="Connection Error",
+                description=str(e),
+                color=0xFF0000,
+            )
+            embed.set_author(name=author.name, icon_url=author.display_avatar.url)
+            return embed, None
     embed = discord.Embed(title=f"Result ({language_dict[language]}):")
     embed_color = 0xFF0000
     files = []

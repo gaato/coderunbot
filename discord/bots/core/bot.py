@@ -89,7 +89,24 @@ class Bot(commands.Bot):
         else:
             content = f'/{ctx.name} {" ".join([str(arg) for arg in ctx.options.values()])}'
         exception_text = ''.join(traceback.format_exception(type(exception), exception, exception.__traceback__))
-        await self.logging_channel.send(content=f'```\n{content}\n```', file=discord.File(io.StringIO(exception_text), filename='error.txt'))
+        content_formatted = "```\n" + content + "\n```"
+        # attempt to resolve the channel if not cached
+        if self.logging_channel is None:
+            try:
+                self.logging_channel = await self.fetch_channel(LOG_CHANNEL_ID)
+            except Exception:
+                print("Unable to fetch log channel", LOG_CHANNEL_ID)
+                print(exception_text)
+                return
+        # Try to send to Discord log channel, but don't raise if it fails; fallback to stdout
+        try:
+            await self.logging_channel.send(content=content_formatted, file=discord.File(io.StringIO(exception_text), filename='error.txt'))
+        except discord.Forbidden:
+            print('Bot missing access to log channel:', LOG_CHANNEL_ID)
+            print(exception_text)
+        except Exception:
+            print('Failed to send log to channel:', LOG_CHANNEL_ID)
+            traceback.print_exc()
 
     def run(self):
         try:

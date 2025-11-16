@@ -4,10 +4,13 @@ services:
   coderunbot:
     build: discord
     env_file: .env
+    restart: unless-stopped
   gaato-bot:
     build: discord
     env_file: .env
     environment:
       - GAATO_BOT=1
+    restart: unless-stopped
   tex:
     build: tex
+    restart: unless-stopped
