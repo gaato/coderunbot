@@ -1,7 +1,7 @@
 import io
 import os
 import pathlib
-from typing import Optional, Tuple
+from typing import Optional, cast
 
 import aiohttp
 import discord
@@ -13,8 +13,8 @@ BASE_DIR = pathlib.Path(__file__).parent.parent
 
 
 async def respond_core(
-    author: discord.User, code: str, spoiler: bool
-) -> Tuple[str, discord.Embed, Optional[discord.File]]:
+    author: discord.abc.User, code: str, spoiler: bool
+) -> tuple[str, discord.Embed, Optional[discord.File]]:
     base_url = os.environ.get("TEX_BASE_URL", "http://127.0.0.1:8080").rstrip("/")
     url = f"{base_url}/render/png"
     params = {"latex": code}
@@ -30,14 +30,13 @@ async def respond_core(
                 )
                 embed.set_author(
                     name=author.name,
-                    icon_url=author.display_avatar.url,
                 )
                 return "", embed, None
 
             result = await r.read()
             file = discord.File(io.BytesIO(result), filename="tex.png", spoiler=spoiler)
             embed = discord.Embed(color=0x008000)
-            embed.set_author(name=author.name, icon_url=author.display_avatar.url)
+            embed.set_author(name=author.name)
             if not spoiler:
                 embed.set_image(url="attachment://tex.png")
             if "\\\\" in code and "\\begin" not in code and "\\end" not in code:
@@ -64,18 +63,22 @@ class TeXModal(discord.ui.Modal):
             )
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction) -> None:
+        author = interaction.user
+        if author is None:
+            return
         await interaction.response.defer(invisible=False)
+        code_value = cast(str, self.children[0].value or "")
         content, embed, file = await respond_core(
-            interaction.user,
-            self.children[0].value,
+            author,
+            code_value,
             self.spoiler,
         )
         embed.add_field(
             name="Code",
-            value=f"```tex\n{self.children[0].value}\n```",
+            value=f"```tex\n{code_value}\n```",
         )
-        view = discord.ui.View(DeleteButton(interaction.user), timeout=None)
+        view = discord.ui.View(DeleteButton(author), timeout=None)
         if file is None:
             await interaction.followup.send(
                 content=content, embed=embed, view=view, wait=True

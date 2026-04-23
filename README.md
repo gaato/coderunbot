@@ -18,26 +18,27 @@ This is a bot for internal use that adds other functions to CodeRunBot. Also, th
 
 ## Requirements
 
-- Python >= 3.10
+- Python >= 3.14
 - [tex.gaato.net](https://github.com/gaato/tex.gaato.net)
 
 ## How to run (CodeRunBot)
 
 Set `CODERUNBOT_TOKEN` in the environment file.
 
-### with venv (recommended)
+### with uv (recommended)
 
-```
-$ source /path/to/venv/bin/activate
-$ pip install pip-tools
-$ pip-sync
-$ python -m bots
+```bash
+$ cd discord
+$ uv sync --locked
+$ uv run python -m bots
 ```
 
-### without venv
+### without uv
 
-```
-$ pip install -r requirements.txt
+```bash
+$ python -m venv .venv
+$ . .venv/bin/activate
+$ pip install aiohttp google-api-python-client google-auth-oauthlib iso639-lang openai "py-cord[voice]>=2.6" python-dotenv
 $ python -m bots
 ```
 
@@ -45,15 +46,15 @@ $ python -m bots
 
 Basically the same as CodeRunBot, but set the environment file to include `GAATO_BOT_TOKEN`, `GOOGLE_API_KEY` and `WOLFRAM_APPID` and the execution command is as follows. You also need ffmpeg.
 
-```
-$ python -m bots -g
+```bash
+$ GAATO_BOT=1 uv run python -m bots
 ```
 
 ## For developer
 
 Pull requests are welcome.
-Please use [pip-tools](https://github.com/jazzband/pip-tools) to manage packages.
-Do not rewrite requirements.txt by hand.
+Please use [uv](https://docs.astral.sh/uv/) to manage dependencies.
+Do not rewrite `uv.lock` by hand.
 
 ## Environment
 

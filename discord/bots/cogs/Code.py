@@ -1,7 +1,7 @@
 import io
 import pathlib
 import re
-from typing import List, Optional, Tuple
+from typing import cast
 
 import aiohttp
 import discord
@@ -23,7 +23,7 @@ BASE_DIR = pathlib.Path(__file__).parent.parent
 # )
 
 
-def get_autocomplete_languages() -> List[str]:
+def get_autocomplete_languages() -> list[str]:
     with requests.get(URL + "list.json") as r:
         r.raise_for_status()
         result = r.json()
@@ -37,7 +37,7 @@ def get_autocomplete_languages() -> List[str]:
 autocomplete_languages = get_autocomplete_languages()
 
 
-def auto_complete_language(ctx: discord.AutocompleteContext) -> List[str]:
+def auto_complete_language(ctx: discord.AutocompleteContext) -> list[str]:
     return list(
         filter(
             lambda language_code: language_code.startswith(ctx.value.lower()),
@@ -46,7 +46,7 @@ def auto_complete_language(ctx: discord.AutocompleteContext) -> List[str]:
     )
 
 
-async def get_languages() -> dict:
+async def get_languages() -> dict[str, str]:
     async with aiohttp.ClientSession() as session:
         async with session.get(URL + "list.json") as r:
             if r.status == 200:
@@ -72,11 +72,11 @@ async def get_languages() -> dict:
 
 
 async def run_core(
-    author: discord.User,
+    author: discord.abc.User,
     language: str,
     code: str,
     stdin: str = "",
-) -> Tuple[discord.Embed, Optional[discord.File]]:
+) -> tuple[discord.Embed, list[discord.File]]:
     language_dict = await get_languages()
     if language not in language_dict.keys():
         embed = discord.Embed(
@@ -84,8 +84,8 @@ async def run_core(
             description=", ".join(language_dict.keys()),
             color=0xFF0000,
         )
-        embed.set_author(name=author.name, icon_url=author.display_avatar.url)
-        return embed, None
+        embed.set_author(name=author.name)
+        return embed, []
     if language == "nim":
         compiler_option = (
             "--hint[Processing]:off\n"
@@ -124,22 +124,22 @@ async def run_core(
                         max_preview = 750
                         preview = text[:max_preview] + ("..." if len(text) > max_preview else "")
                         embed.add_field(name="Response Preview", value=f"``\n{preview}\n```")
-                        embed.set_author(name=author.name, icon_url=author.display_avatar.url)
-                        return embed, None
+                        embed.set_author(name=author.name)
+                        return embed, []
                 else:
                     embed = discord.Embed(
                         title="Connection Error", description=f"{r.status}", color=0xFF0000
                     )
-                    embed.set_author(name=author.name, icon_url=author.display_avatar.url)
-                    return embed, None
+                    embed.set_author(name=author.name)
+                    return embed, []
         except aiohttp.ClientError as e:
             embed = discord.Embed(
                 title="Connection Error",
                 description=str(e),
                 color=0xFF0000,
             )
-            embed.set_author(name=author.name, icon_url=author.display_avatar.url)
-            return embed, None
+            embed.set_author(name=author.name)
+            return embed, []
     embed = discord.Embed(title=f"Result ({language_dict[language]}):")
     embed_color = 0xFF0000
     files = []
@@ -155,14 +155,14 @@ async def run_core(
             if v == "":
                 continue
         if len(v) > 1000 or len(v.split("\n")) > 100:
-            files.append(discord.File(io.StringIO(v), k + ".txt"))
+            files.append(discord.File(io.BytesIO(v.encode()), k + ".txt"))
         else:
             embed.add_field(
                 name=k,
                 value="```\n" + v + "\n```",
             )
     embed.color = embed_color
-    embed.set_author(name=author.name, icon_url=author.display_avatar.url)
+    embed.set_author(name=author.name)
     return embed, files
 
 
@@ -251,21 +251,26 @@ class RunModal(discord.ui.Modal):
             )
         )
 
-    async def callback(self, interaction: Interaction):
+    async def callback(self, interaction: Interaction) -> None:
+        author = interaction.user
+        if author is None:
+            return
         await interaction.response.defer(invisible=False)
+        code_value = cast(str, self.children[0].value or "")
+        stdin_value = cast(str, self.children[1].value or "")
         embed, files = await run_core(
-            interaction.user,
+            author,
             self.language,
-            self.children[0].value,
-            self.children[1].value,
+            code_value,
+            stdin_value,
         )
         embed.add_field(
             name="Code",
-            value=f"```{self.language}\n{self.children[0].value}\n```",
+            value=f"```{self.language}\n{code_value}\n```",
         )
-        view = discord.ui.View(DeleteButton(interaction.user), timeout=None)
-        m = await interaction.followup.send(
-            embed=embed, files=files, view=view, wait=True
+        view = discord.ui.View(DeleteButton(author), timeout=None)
+        await interaction.followup.send(
+            embed=embed, files=files or None, view=view, wait=True
         )
         # c.execute(
         #     "INSERT INTO code VALUES (?, ?, ?, ?, ?)",
@@ -296,7 +301,7 @@ class Code(commands.Cog):
         code = re.sub(r"^```.*$", "", code, flags=re.MULTILINE)
         view = discord.ui.View(DeleteButton(ctx.author), timeout=None)
         embed, files = await run_core(ctx.author, language, code)
-        m = await ctx.reply(embed=embed, files=files, view=view)
+        m = await ctx.reply(embed=embed, files=files or None, view=view)
         self.user_message_id_to_bot_message[ctx.message.id] = m
 
     @discord.message_command()

@@ -40,7 +40,8 @@ def autocomplete_language(ctx: discord.AutocompleteContext) -> list[str]:
         matching_languages = [
             name for name in language_names if name.lower().startswith(input_value)
         ]
-        return sorted(matching_languages, key=len)[:30]
+        matching_languages.sort(key=lambda name: len(name))
+        return matching_languages[:30]
 
 
 class Translate(commands.Cog):
@@ -103,13 +104,13 @@ class Translate(commands.Cog):
             color=discord.Color.blurple(),
         )
         embed.add_field(
-            name=f"Original text",
+            name="Original text",
             value=text,
             inline=False,
         )
         embed.add_field(
             name=f"Translated to {to}",
-            value=response.choices[0].message.content,
+            value=response.choices[0].message.content or "",
             inline=False,
         )
         view = discord.ui.View(DeleteButton(ctx.user))

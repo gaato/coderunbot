@@ -1,0 +1,17 @@
+[project]
+name = "coderunbot-discord"
+version = "0.1.0"
+description = "Discord bots for coderunbot and gaato-bot"
+requires-python = ">=3.14"
+dependencies = [
+    "aiohttp",
+    "google-api-python-client",
+    "google-auth-oauthlib",
+    "iso639-lang",
+    "openai",
+    "py-cord[voice]>=2.6",
+    "python-dotenv",
+]
+
+[tool.uv]
+package = false
