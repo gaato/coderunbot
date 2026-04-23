@@ -1,4 +1,5 @@
 import io
+import asyncio
 import os
 import pathlib
 import traceback
@@ -22,6 +23,15 @@ def is_sendable_channel(channel: object) -> TypeGuard[SendableChannel]:
     )
 
 
+def ensure_event_loop() -> asyncio.AbstractEventLoop:
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
+
+
 class Bot(commands.Bot):
     def __init__(self, token: str | None, cogs: list[str], prefix: str):
         self.token = token
@@ -29,6 +39,7 @@ class Bot(commands.Bot):
         self.developer: discord.User | None = None
         intents = discord.Intents.default()
         intents.message_content = True
+        ensure_event_loop()
         super().__init__(command_prefix=prefix, intents=intents)
         self.load_cogs(cogs)
 
