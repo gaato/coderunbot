@@ -11,7 +11,8 @@ const sharp = require('sharp');
 
 
 const app = express();
-const port = 80;
+const host = process.env.HOST || '127.0.0.1';
+const port = Number.parseInt(process.env.PORT || '8080', 10);
 
 app.use(bodyParser.json());
 
@@ -93,6 +94,6 @@ function handleRenderingError(error, res) {
   res.status(500).send('An error occurred while rendering the LaTeX string.');
 }
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`Server is running at http://${host}:${port}`);
 });

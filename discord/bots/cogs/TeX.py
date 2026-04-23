@@ -1,4 +1,5 @@
 import io
+import os
 import pathlib
 from typing import Optional, Tuple
 
@@ -14,7 +15,8 @@ BASE_DIR = pathlib.Path(__file__).parent.parent
 async def respond_core(
     author: discord.User, code: str, spoiler: bool
 ) -> Tuple[str, discord.Embed, Optional[discord.File]]:
-    url = "http://tex/render/png"
+    base_url = os.environ.get("TEX_BASE_URL", "http://127.0.0.1:8080").rstrip("/")
+    url = f"{base_url}/render/png"
     params = {"latex": code}
     headers = {"Content-Type": "application/json"}
     async with aiohttp.ClientSession() as session:
