@@ -1,0 +1,56 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "gaato/coderunbot/wandbox"
+
+import {
+  "gaato/coderunbot/core",
+  "gaato/discord/model",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn append_code_field(RunOutput, String, String) -> RunOutput
+
+pub fn error_output(String, String, String) -> RunOutput
+
+pub fn expand_language_alias(String) -> String
+
+pub fn filter_nim_compiler_error(String) -> String
+
+pub fn map_result(Json, String, String, String) -> RunOutput raise WandboxError
+
+pub fn normalize_language(String) -> String
+
+pub async fn run(LanguageCache, String, String, String, stdin? : String) -> RunOutput
+
+pub fn select_compilers(ArrayView[CompilerInfo]) -> Map[String, String]
+
+// Errors
+pub(all) suberror WandboxError {
+  Http(status~ : Int, reason~ : String)
+  InvalidResponse(String)
+} derive(@debug.Debug)
+
+// Types and methods
+pub(all) struct CompilerInfo {
+  name : String
+  language : String
+} derive(Eq, @debug.Debug, @json.FromJson)
+
+pub struct LanguageCache {
+  // private fields
+}
+pub fn LanguageCache::LanguageCache() -> Self
+pub async fn LanguageCache::compilers(Self) -> Map[String, String]
+pub async fn LanguageCache::language_names(Self) -> Array[String]
+pub async fn LanguageCache::warm(Self) -> Unit
+
+pub(all) struct RunOutput {
+  embed : @model.Embed
+  files : Array[@core.OutputFile]
+} derive(@debug.Debug)
+
+// Type aliases
+
+// Traits
+

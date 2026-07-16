@@ -1,0 +1,53 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "gaato/coderunbot/texrender"
+
+import {
+  "gaato/coderunbot/core",
+  "gaato/discord/model",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn append_code_field(TexOutput, String) -> TexOutput
+
+pub fn decode_response(String) -> WorkerResponse raise
+
+pub fn encode_request(Int, String) -> String
+
+pub fn render_error(String, String) -> TexOutput
+
+pub fn render_success(String, String, Bool, Bytes) -> TexOutput
+
+// Errors
+pub(all) suberror TexWorkerError {
+  NotReady
+  EndOfFile
+  Protocol(String)
+  Render(String)
+} derive(@debug.Debug)
+
+// Types and methods
+pub(all) struct TexOutput {
+  embed : @model.Embed
+  files : Array[@core.OutputFile]
+} derive(@debug.Debug)
+
+pub struct TexRenderer {
+  // private fields
+}
+pub fn TexRenderer::TexRenderer(worker_path? : String, timeout_ms? : Int) -> Self
+pub async fn TexRenderer::render(Self, String) -> Bytes
+pub async fn TexRenderer::supervise(Self) -> Unit
+
+pub(all) struct WorkerResponse {
+  id : Int
+  ok : Bool
+  png : String?
+  error : String?
+} derive(Eq, @debug.Debug, @json.FromJson)
+
+// Type aliases
+
+// Traits
+

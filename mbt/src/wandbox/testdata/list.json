@@ -1,0 +1,8 @@
+[
+  { "name": "gcc-head", "language": "C++" },
+  { "name": "gcc-14.2", "language": "C++" },
+  { "name": "cpp-1.0", "language": "CPP" },
+  { "name": "nim-git", "language": "Nim" },
+  { "name": "nim-2.2.0", "language": "Nim" },
+  { "name": "cpython-3.13.1", "language": "Python" }
+]
