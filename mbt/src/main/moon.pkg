@@ -1,7 +1,15 @@
 import {
+  "gaato/coderunbot/core",
+  "gaato/coderunbot/features",
+  "gaato/coderunbot/state",
+  "gaato/coderunbot/texrender",
+  "gaato/coderunbot/wandbox",
   "gaato/discord",
+  "gaato/discord/http" @dhttp,
   "gaato/discord/model",
   "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/io",
   "moonbitlang/async/signal",
   "moonbitlang/core/env",
 }

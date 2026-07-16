@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "gaato/coderunbot/features"
+
+import {
+  "gaato/coderunbot/state",
+  "gaato/coderunbot/texrender",
+  "gaato/coderunbot/wandbox",
+  "gaato/discord/app",
+  "gaato/discord/bot",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn install_code(@app.App, @wandbox.LanguageCache) -> Unit
+
+pub fn install_prefix(@bot.Bot, @wandbox.LanguageCache, @texrender.TexRenderer, @state.OptOutUsers) -> Unit
+
+pub fn install_privacy(@app.App, @state.OptOutUsers, String) -> Unit
+
+pub fn install_tex(@app.App, @texrender.TexRenderer) -> Unit
+
+pub fn parse_prefix(String) -> PrefixCommand?
+
+pub async fn render_tex(@texrender.TexRenderer, String, String, Bool) -> @texrender.TexOutput
+
+pub async fn run_code(@wandbox.LanguageCache, String, String, String, stdin? : String) -> @wandbox.RunOutput
+
+pub fn strip_fences(String) -> String
+
+pub fn strip_tex_fences(String) -> String
+
+// Errors
+
+// Types and methods
+pub(all) enum PrefixCommand {
+  Run(language~ : String, code~ : String)
+  Tex(code~ : String, spoiler~ : Bool)
+  Invalid(String)
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

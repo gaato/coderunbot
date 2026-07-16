@@ -9,6 +9,22 @@ fn ping_command() -> @discord.Command[Unit] {
 }
 
 ///|
+async fn privacy_policy() -> String {
+  let path = @env.get_env_var("PRIVACY_POLICY_FILE").unwrap_or(
+    "./config/privacy-policy.md",
+  )
+  @fs.read_file(path).text()
+}
+
+///|
+fn intents() -> @model.Intents {
+  @model.Intents::guilds() |
+  @model.Intents::guild_messages() |
+  @model.Intents::direct_messages() |
+  @model.Intents::message_content()
+}
+
+///|
 fn command_sync() -> @discord.CommandSync {
   match @env.get_env_var("GUILD_ID") {
     Some(raw) => {
@@ -31,11 +47,38 @@ fn command_sync() -> @discord.CommandSync {
 async fn main {
   @signal.set_global_cancellation_signals([SIGINT, SIGTERM])
   try {
-    let token = @env.get_env_var("CODERUNBOT_MBT_TOKEN").unwrap_or("")
+    guard @env.get_env_var("CODERUNBOT_MBT_TOKEN") is Some(token) &&
+      !token.trim().is_empty() else {
+      println("[error] CODERUNBOT_MBT_TOKEN is required; refusing to connect")
+      return
+    }
+    let client = @dhttp.Client(token)
+    defer client.close()
+    let users = @state.load_opt_out_users(@state.TextState::from_env())
+    let policy = privacy_policy()
+    let cache = @wandbox.LanguageCache()
+    let renderer = @texrender.TexRenderer()
     let app = @discord.App(sync=command_sync())
     app.command(ping_command())
+    app.on_warn(message => println("[warn] \{message}"))
+    app.error_policy((ctx, error) => {
+      ctx.respond_error("Please Report us!\n\{@core.SUPPORT_SERVER_LINK}") catch {
+        response_error =>
+          println(
+            "[warn] failed to report interaction error: \{to_repr(response_error)}",
+          )
+      }
+      @core.log_error(client, "\{to_repr(ctx.origin())}", error)
+    })
+    @core.install_delete_handler(app)
+    @features.install_code(app, cache)
+    @features.install_tex(app, renderer)
+    @features.install_privacy(app, users, policy)
 
-    let bot = @discord.Bot(app, token~)
+    let bot = @discord.Bot(app, token~, client~, intents=intents())
+    @features.install_prefix(bot, cache, renderer, users)
+    bot.service(name="language-cache", _ => cache.warm())
+    bot.service(name="texworker", _ => renderer.supervise())
     bot.on(@discord.Events::ready(), (_, ready) => {
       println("[bot] ready as \{ready.user.username}")
     })
