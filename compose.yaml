@@ -5,6 +5,16 @@ services:
     build: discord
     env_file: .env
     restart: unless-stopped
+  coderunbot-mbt:
+    build:
+      context: .
+      dockerfile: mbt/Dockerfile
+    platform: linux/amd64
+    env_file: .env
+    environment:
+      CODERUNBOT_MBT_TOKEN: ${CODERUNBOT_MBT_TOKEN:-}
+      OPT_OUT_PAR_URL: ${OPT_OUT_PAR_URL:-}
+    restart: unless-stopped
   gaato-bot:
     build: discord
     env_file: .env

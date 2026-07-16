@@ -1,0 +1,8 @@
+.git
+**/.git
+.env
+**/node_modules
+_build
+**/_build
+discord/.venv
+**/__pycache__
