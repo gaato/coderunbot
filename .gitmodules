@@ -1,0 +1,6 @@
+[submodule "discord.mbt"]
+	path = discord.mbt
+	url = https://github.com/gaato/discord.mbt
+[submodule "tex.gaato.net"]
+	path = tex.gaato.net
+	url = https://github.com/gaato/tex.gaato.net

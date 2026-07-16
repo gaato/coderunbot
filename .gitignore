@@ -133,3 +133,8 @@ youtube-*
 
 # dynamic config file
 languages.json
+
+# MoonBit
+_build/
+.mooncakes/
+mbt/.env
