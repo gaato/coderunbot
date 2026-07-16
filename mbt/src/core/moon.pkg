@@ -1,0 +1,8 @@
+import {
+  "gaato/discord",
+  "gaato/discord/http" @dhttp,
+  "gaato/discord/model",
+  "moonbitlang/core/encoding/utf8",
+}
+
+supported_targets = "native"

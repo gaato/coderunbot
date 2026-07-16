@@ -1,0 +1,39 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "gaato/coderunbot/state"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub async fn load_opt_out_users(TextState) -> OptOutUsers
+
+pub fn parse_opt_out_users(String) -> Array[UInt64] raise
+
+pub fn serialize_opt_out_users(ArrayView[UInt64]) -> String
+
+// Errors
+pub(all) suberror StateError {
+  Http(status~ : Int, reason~ : String)
+} derive(@debug.Debug)
+
+// Types and methods
+pub struct OptOutUsers {
+  // private fields
+}
+pub async fn OptOutUsers::add(Self, UInt64) -> Unit
+pub async fn OptOutUsers::contains(Self, UInt64) -> Bool
+pub async fn OptOutUsers::remove(Self, UInt64) -> Unit
+
+pub struct TextState {
+  // private fields
+}
+pub fn TextState::TextState(local_path~ : String, par_url? : String) -> Self
+pub fn TextState::from_env() -> Self
+pub async fn TextState::read(Self) -> String
+pub async fn TextState::write(Self, String) -> Unit
+
+// Type aliases
+
+// Traits
+
