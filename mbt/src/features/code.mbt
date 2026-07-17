@@ -100,7 +100,7 @@ pub fn install_code(app : @discord.App, cache : @wandbox.LanguageCache) -> Unit 
       name="escape",
       handler=Immediate((_, message) => {
         @discord.CommandReply::message(
-          content=@core.escape_markdown(@core.escape_mentions(message.content)),
+          content=@util.escape_markdown(@util.escape_mentions(message.content)),
           ephemeral=true,
         )
       }),

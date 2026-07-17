@@ -1,5 +1,16 @@
 ///|
-fn tex_args() -> @discord.Args[Unit] {
+priv struct TexArgs {
+  environment : String?
+  spoiler : Bool
+}
+
+///|
+priv struct TexForm {
+  code : String
+}
+
+///|
+fn tex_args() -> @discord.Args[TexArgs] {
   @discord.Args::map2(
     @discord.arg_string(name="env", description="The environment to use", choices=[
       @discord.string_choice("align", "align"),
@@ -9,7 +20,24 @@ fn tex_args() -> @discord.Args[Unit] {
       name="spoiler",
       description="Whether to mark the image as a spoiler",
     ).with_default(false),
-    (_, _) => (),
+    (environment, spoiler) => { environment, spoiler },
+  )
+}
+
+///|
+fn tex_modal() -> @discord.Modal[TexForm] {
+  @discord.modal(
+    custom_id="texm",
+    title="LaTeX to Image",
+    fields=@discord.ModalFields::map1(
+      @discord.text_field(
+        custom_id="code",
+        label="Code",
+        style=Paragraph,
+        placeholder="Input TeX code here",
+      ),
+      code => { code, },
+    ),
   )
 }
 
@@ -38,41 +66,31 @@ pub fn install_tex(
   app : @discord.App,
   renderer : @texrender.TexRenderer,
 ) -> Unit {
+  let modal = tex_modal()
   app.command(
     @discord.slash(
       name="tex",
       description="TeX to image",
       args=tex_args(),
-      handler=Raw(ctx => {
-        let environment = ctx.options.string_opt("env")
-        let spoiler = ctx.options.bool_opt("spoiler").unwrap_or(false)
-        let value = match environment {
+      handler=Immediate((_, args) => {
+        let value = match args.environment {
           Some(name) => "\\begin{\{name}}\n\n\\end{\{name}}"
           None => ""
         }
-        ctx.show_modal(custom_id="texm:\{spoiler}", title="LaTeX to Image", components=[
-          @discord.label(
-            label="Code",
-            component=@discord.text_input(
-              custom_id="code",
-              style=Paragraph,
-              placeholder="Input TeX code here",
-              value~,
-            ),
-          ),
-        ])
+        ShowModal(modal.show(state="\{args.spoiler}", values={ "code": value }))
       }),
     ),
   )
-  app.on_modal_raw(prefix="texm:", ctx => {
-    ctx.defer_response(ephemeral=false)
-    let spoiler = ctx.data.custom_id.strip_prefix("texm:") == Some("true")
-    let code = ctx.text_value("code").unwrap_or("")
-    let output = render_tex(renderer, ctx.user().username, code, spoiler)
-      |> @texrender.append_code_field(code)
-    ctx.followup(embeds=[output.embed], files=uploads(output.files), components=[
-      @core.delete_row(ctx.user().id.value()),
-    ])
-    |> ignore
-  })
+  app.on_modal(
+    modal,
+    Deferred(ephemeral=false, (ctx, form) => {
+      let spoiler = ctx.state() == Some("true")
+      let output = render_tex(renderer, ctx.user().username, form.code, spoiler)
+        |> @texrender.append_code_field(form.code)
+      ctx.followup(embeds=[output.embed], files=uploads(output.files), components=[
+        @core.delete_row(ctx.user().id.value()),
+      ])
+      |> ignore
+    }),
+  )
 }

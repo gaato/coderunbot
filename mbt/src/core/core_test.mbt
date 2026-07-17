@@ -17,23 +17,3 @@ test "delete ids encode and authorize the requester" {
   assert_false(@core.delete_authorized("del:42", 7UL))
   assert_false(@core.delete_authorized("other:42", 42UL))
 }
-
-///|
-test "escape mentions matches Pycord mention classes" {
-  inspect(
-    @core.escape_mentions(
-      "@everyone @here <@12345678901234567> <@!123456789012345678> <@&1234567890123456789> <#123456789012345678>",
-    ),
-    content="@​everyone @​here <@​12345678901234567> <@​!123456789012345678> <@​&1234567890123456789> <#123456789012345678>",
-  )
-}
-
-///|
-test "escape markdown preserves URLs and escapes stock syntax" {
-  inspect(
-    @core.escape_markdown(
-      "**bold** _x_ https://example.test/a_b?q=*x*\n> quote\n[text](target)",
-    ),
-    content="\\*\\*bold\\*\\* \\_x\\_ https://example.test/a_b?q=*x*\n\\> quote\n\\[text](target)",
-  )
-}

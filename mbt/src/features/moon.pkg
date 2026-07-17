@@ -4,10 +4,9 @@ import {
   "gaato/coderunbot/texrender",
   "gaato/coderunbot/wandbox",
   "gaato/discord",
-  "gaato/discord/framework",
   "gaato/discord/http" @dhttp,
-  "gaato/discord/interaction",
   "gaato/discord/model",
+  "gaato/discord/util",
 }
 
 supported_targets = "native"

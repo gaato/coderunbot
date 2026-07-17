@@ -62,7 +62,24 @@ async fn main {
     app.command(ping_command())
     app.on_warn(message => println("[warn] \{message}"))
     app.error_policy((ctx, error) => {
-      ctx.respond_error("Please Report us!\n\{@core.SUPPORT_SERVER_LINK}") catch {
+      let content = "Please Report us!\n\{@core.SUPPORT_SERVER_LINK}"
+      try {
+        match ctx.user() {
+          Some(user) =>
+            ctx.respond_error(
+              content~,
+              embeds=[
+                @model.Embed(
+                  title="Unhandled Error",
+                  color=0xFF0000,
+                  author=@model.EmbedAuthor(user.username),
+                ),
+              ],
+              components=[@core.delete_row(user.id.value())],
+            )
+          None => ctx.respond_error(content~)
+        }
+      } catch {
         response_error =>
           println(
             "[warn] failed to report interaction error: \{to_repr(response_error)}",
@@ -76,6 +93,12 @@ async fn main {
     @features.install_privacy(app, users, policy)
 
     let bot = @discord.Bot(app, token~, client~, intents=intents())
+    bot.attach_cache(
+      @cache.InMemoryCache(
+        resources=@cache.CacheResources(messages=true),
+        max_messages_per_channel=100,
+      ),
+    )
     @features.install_prefix(bot, cache, renderer, users)
     bot.service(name="language-cache", _ => cache.warm())
     bot.service(name="texworker", _ => renderer.supervise())

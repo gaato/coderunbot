@@ -17,19 +17,11 @@ pub const LOG_CHANNEL_ID : UInt64 = 1118867011448078417
 
 pub const SUPPORT_SERVER_LINK : String = "discord.gg/qRpYRTgvXM"
 
-pub fn add_embed_field(@model.Embed, String, String, inline? : Bool) -> @model.Embed
-
 pub fn delete_authorized(StringView, UInt64) -> Bool
 
 pub fn delete_custom_id(UInt64) -> String
 
 pub fn delete_row(UInt64) -> @model.Component
-
-pub fn embed(title? : String, description? : String, color? : Int, author_name? : String, image_url? : String, fields? : Array[@model.EmbedField]) -> @model.Embed
-
-pub fn escape_markdown(String) -> String
-
-pub fn escape_mentions(String) -> String
 
 pub fn install_delete_handler(@app.App) -> Unit
 

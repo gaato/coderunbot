@@ -69,14 +69,14 @@ pub fn map_result(
         spoiler: false,
       })
     } else {
-      fields.push({ name: key, value: "```\n\{value}\n```", inline: None })
+      fields.push(@model.EmbedField(key, "```\n\{value}\n```"))
     }
   }
   {
-    embed: @core.embed(
+    embed: @model.Embed(
       title="Result (\{compiler}):",
       color~,
-      author_name~,
+      author=@model.EmbedAuthor(author_name),
       fields~,
     ),
     files,
@@ -90,7 +90,12 @@ pub fn error_output(
   author_name : String,
 ) -> RunOutput {
   {
-    embed: @core.embed(title~, description~, color=0xFF0000, author_name~),
+    embed: @model.Embed(
+      title~,
+      description~,
+      color=0xFF0000,
+      author=@model.EmbedAuthor(author_name),
+    ),
     files: [],
   }
 }
@@ -101,12 +106,7 @@ pub fn append_code_field(
   language : String,
   code : String,
 ) -> RunOutput {
-  {
-    ..output,
-    embed: @core.add_embed_field(
-      output.embed,
-      "Code",
-      "```\{language}\n\{code}\n```",
-    ),
-  }
+  let fields = output.embed.fields.unwrap_or([]).copy()
+  fields.push(@model.EmbedField("Code", "```\{language}\n\{code}\n```"))
+  { ..output, embed: { ..output.embed, fields: Some(fields) } }
 }

@@ -78,11 +78,11 @@ fn PrefixFeature::PrefixFeature(
 
 ///|
 fn invalid_input(author_name : String, message : String) -> @model.Embed {
-  @core.embed(
+  @model.Embed(
     title="Invalid Input",
     description="```\n\{message}\n```",
     color=0xFF0000,
-    author_name~,
+    author=@model.EmbedAuthor(author_name),
   )
 }
 
@@ -93,31 +93,40 @@ async fn PrefixFeature::reply_for(
   message : @model.Message,
   command : PrefixCommand,
 ) -> @model.Message {
-  ctx.app().http().trigger_typing(message.channel_id)
   let reference = ctx.ref_of_message(message)
-  match command {
-    Run(language~, code~) => {
-      let output = run_code(self.cache, message.author.username, language, code)
-      reference.reply(embeds=[output.embed], files=uploads(output.files), components=[
-        @core.delete_row(message.author.id.value()),
-      ])
+  ctx
+  .channel_ref(message.channel_id)
+  .with_typing(() => {
+    match command {
+      Run(language~, code~) => {
+        let output = run_code(
+          self.cache,
+          message.author.username,
+          language,
+          code,
+        )
+        reference.reply(embeds=[output.embed], files=uploads(output.files), components=[
+          @core.delete_row(message.author.id.value()),
+        ])
+      }
+      Tex(code~, spoiler~) => {
+        let output = render_tex(
+          self.renderer,
+          message.author.username,
+          code,
+          spoiler,
+        )
+        reference.reply(embeds=[output.embed], files=uploads(output.files), components=[
+          @core.delete_row(message.author.id.value()),
+        ])
+      }
+      Invalid(reason) =>
+        reference.reply(
+          embeds=[invalid_input(message.author.username, reason)],
+          components=[@core.delete_row(message.author.id.value())],
+        )
     }
-    Tex(code~, spoiler~) => {
-      let output = render_tex(
-        self.renderer,
-        message.author.username,
-        code,
-        spoiler,
-      )
-      reference.reply(embeds=[output.embed], files=uploads(output.files), components=[
-        @core.delete_row(message.author.id.value()),
-      ])
-    }
-    Invalid(reason) =>
-      reference.reply(embeds=[invalid_input(message.author.username, reason)], components=[
-        @core.delete_row(message.author.id.value()),
-      ])
-  }
+  })
 }
 
 ///|
@@ -127,10 +136,10 @@ async fn PrefixFeature::report_prefix_error(
   message : @model.Message,
   error : Error,
 ) -> Unit {
-  let response = @core.embed(
+  let response = @model.Embed(
     title="Unhandled Error",
     color=0xFF0000,
-    author_name=message.author.username,
+    author=@model.EmbedAuthor(message.author.username),
   )
   try
     ctx
@@ -176,6 +185,7 @@ async fn PrefixFeature::on_update(
   ctx : @discord.GatewayCtx,
   event : @model.MessageUpdateEvent,
 ) -> Unit {
+  guard event.is_edit() else { return }
   let message = event.message
   match self.replies.get(message.id) {
     Some(previous) if previous.content == message.content => return
@@ -190,10 +200,7 @@ async fn PrefixFeature::on_update(
       self.replies.remove(message.id)
       self.dispatch(ctx, message)
     }
-    None =>
-      if message.edited_timestamp is Value(_) {
-        self.dispatch(ctx, message)
-      }
+    None => self.dispatch(ctx, message)
   }
 }
 

@@ -5,6 +5,7 @@ import {
   "gaato/coderunbot/texrender",
   "gaato/coderunbot/wandbox",
   "gaato/discord",
+  "gaato/discord/cache",
   "gaato/discord/http" @dhttp,
   "gaato/discord/model",
   "moonbitlang/async",
