@@ -4,8 +4,10 @@
 import {
   ActionRowBuilder,
   ApplicationCommandType,
+  AttachmentBuilder,
   ContextMenuCommandBuilder,
   escapeMarkdown,
+  FileBuilder,
   ModalBuilder,
   SlashCommandBuilder,
   TextInputBuilder,
@@ -32,6 +34,35 @@ import {
 
 export function escapeMentions(content: string): string {
   return content.replaceAll("@", "@\u200b");
+}
+
+const PLAIN_CONTENT_LIMIT = 2_000;
+
+export function escapeReply(content: string, locale: string): OutgoingReply {
+  const t = getFixedT(locale);
+  // Components V2 messages and attachment-only messages have no text content.
+  if (content.length === 0) {
+    return {
+      kind: "plain",
+      content: t("code.escape.noText"),
+      ephemeral: true,
+    };
+  }
+
+  const escaped = escapeMentions(escapeMarkdown(content));
+  // Escaping adds backslashes, so a long message can outgrow the content limit.
+  if (escaped.length > PLAIN_CONTENT_LIMIT) {
+    return {
+      kind: "components-v2",
+      components: [new FileBuilder().setURL("attachment://escaped.txt")],
+      files: [
+        new AttachmentBuilder(Buffer.from(escaped), { name: "escaped.txt" }),
+      ],
+      ephemeral: true,
+    };
+  }
+
+  return { kind: "plain", content: escaped, ephemeral: true };
 }
 
 export function createCodeFeature(dependencies: FeatureDependencies): Feature {
@@ -121,17 +152,11 @@ export function createCodeFeature(dependencies: FeatureDependencies): Feature {
       },
       {
         data: escapeCommand,
-        async execute(interaction) {
+        async execute(interaction, context) {
           if (!interaction.isMessageContextMenuCommand()) {
             return undefined;
           }
-          return {
-            kind: "plain",
-            content: escapeMentions(
-              escapeMarkdown(interaction.targetMessage.content),
-            ),
-            ephemeral: true,
-          };
+          return escapeReply(interaction.targetMessage.content, context.locale);
         },
       },
     ],

@@ -38,6 +38,9 @@ const resources = {
         },
       },
       code: {
+        escape: {
+          noText: "That message has no text to escape.",
+        },
         supportedLanguagesHeading: "The following languages are supported",
         noLanguagesAvailable:
           "The language list is temporarily unavailable. Please try again later.",
@@ -105,6 +108,9 @@ const resources = {
         },
       },
       code: {
+        escape: {
+          noText: "そのメッセージにはエスケープできるテキストがありません。",
+        },
         supportedLanguagesHeading: "対応している言語",
         noLanguagesAvailable:
           "言語一覧を一時的に取得できません。しばらくしてからもう一度お試しください。",

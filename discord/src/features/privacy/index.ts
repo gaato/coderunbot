@@ -2,7 +2,7 @@
  * Implements privacy-policy and opt-out commands in the feature layer.
  */
 import { readFile } from "node:fs/promises";
-import { SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder, TextDisplayBuilder } from "discord.js";
 import { getFixedT } from "../../shared/i18n.js";
 import type { Feature, FeatureDependencies } from "../../types.js";
 
@@ -29,9 +29,15 @@ export function createPrivacyFeature({
             ja: "プライバシーポリシーを表示します",
           }),
         async execute() {
+          // The policy exceeds the 2,000-character plain-content limit; a Components V2
+          // text display raises the ceiling to 4,000 characters for the whole message.
           return {
-            kind: "plain",
-            content: await readFile(privacyPolicyUrl, "utf8"),
+            kind: "components-v2",
+            components: [
+              new TextDisplayBuilder().setContent(
+                await readFile(privacyPolicyUrl, "utf8"),
+              ),
+            ],
           };
         },
       },
