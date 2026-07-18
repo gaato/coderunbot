@@ -10,6 +10,7 @@ import type {
   SlashCommandBuilder,
 } from "discord.js";
 import type { RequestContext } from "./platform/discord/context.js";
+import type { AppLogger } from "./shared/logger.js";
 import type { OptOutUsers } from "./shared/state.js";
 
 export type FeatureId =
@@ -64,6 +65,7 @@ export interface Feature {
 
 export interface FeatureDependencies {
   readonly optOutUsers: OptOutUsers;
+  readonly logger: AppLogger;
 }
 
 export type FeatureFactory = (dependencies: FeatureDependencies) => Feature;

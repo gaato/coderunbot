@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, Partials, REST } from "discord.js";
 import { getBotProfile } from "./config.js";
 import { loadEnv } from "./env.js";
+import { createCodeFeature } from "./features/code/index.js";
 import { createPingFeature } from "./features/ping/index.js";
 import { createPrivacyFeature } from "./features/privacy/index.js";
 import { createTexFeature } from "./features/tex/index.js";
@@ -25,7 +26,7 @@ function pendingFeature(id: FeatureId): FeatureFactory {
 // replaced by real factories in subsequent migration steps.
 const featureFactories: Record<FeatureId, FeatureFactory> = {
   tex: createTexFeature,
-  code: pendingFeature("code"),
+  code: createCodeFeature,
   privacy: createPrivacyFeature,
   wolfram: pendingFeature("wolfram"),
   misc: pendingFeature("misc"),
@@ -56,7 +57,7 @@ export async function bootstrap(): Promise<void> {
   }
   const optOutUsers = new OptOutUsers(stateBackend);
   await optOutUsers.init();
-  const featureDependencies = { optOutUsers };
+  const featureDependencies = { optOutUsers, logger };
 
   const client = new Client({
     intents: [

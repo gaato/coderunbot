@@ -32,6 +32,27 @@ const resources = {
           codePlaceholder: "Enter TeX code here",
         },
       },
+      code: {
+        supportedLanguagesHeading: "The following languages are supported",
+        noLanguagesAvailable:
+          "The language list is temporarily unavailable. Please try again later.",
+        resultHeading: "Result ({{compiler}})",
+        codeHeading: "Code",
+        modal: {
+          title: "Run code",
+          codeLabel: "Code",
+          codePlaceholder: "Write code here",
+          stdinLabel: "Standard Input",
+        },
+        errors: {
+          heading: "Wandbox Error",
+          connection: "Could not connect to Wandbox. Please try again later.",
+          http: "Wandbox returned HTTP status {{status}}.",
+          nonJson:
+            "Wandbox returned a non-JSON response. Please check the service status and try again later.",
+          responsePreview: "Response Preview",
+        },
+      },
     },
   },
   ja: {
@@ -63,6 +84,28 @@ const resources = {
           title: "LaTeX を画像に変換",
           codeLabel: "コード",
           codePlaceholder: "TeX コードを入力してください",
+        },
+      },
+      code: {
+        supportedLanguagesHeading: "対応している言語",
+        noLanguagesAvailable:
+          "言語一覧を一時的に取得できません。しばらくしてからもう一度お試しください。",
+        resultHeading: "実行結果 ({{compiler}})",
+        codeHeading: "コード",
+        modal: {
+          title: "コードを実行",
+          codeLabel: "コード",
+          codePlaceholder: "コードを入力してください",
+          stdinLabel: "標準入力",
+        },
+        errors: {
+          heading: "Wandbox エラー",
+          connection:
+            "Wandbox に接続できませんでした。しばらくしてからもう一度お試しください。",
+          http: "Wandbox が HTTP ステータス {{status}} を返しました。",
+          nonJson:
+            "Wandbox から JSON ではない応答が返されました。サービスの状態を確認して、しばらくしてからもう一度お試しください。",
+          responsePreview: "応答のプレビュー",
         },
       },
     },
