@@ -46,6 +46,11 @@ commands, mention replies, edit tracking, and inclusion of your messages in
 OpenAI context. Explicitly invoked slash commands and context menu commands
 keep working, since using them is itself consent to process that input.
 
+## Source code
+
+The bots are free software (AGPL-3.0-or-later). The full source code is
+available at <https://github.com/gaato/coderunbot>.
+
 ## Data deletion
 
 We do not build up a store of user data: message content is discarded after a

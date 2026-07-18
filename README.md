@@ -68,3 +68,12 @@ support TypeScript 7 yet.
 For containerized or service-manager based deployment, keep secrets outside the repo and point the process at an environment file.
 
 - Example file: [`coderunbot.env.example`](coderunbot.env.example)
+
+## License
+
+Copyright (C) Gakuto Furuya
+
+This program is free software, licensed under the
+[GNU Affero General Public License v3.0 or later](LICENSE) (AGPL-3.0-or-later).
+If you run a modified version of this bot as a network service, the AGPL
+requires you to offer its source code to the users interacting with it.
