@@ -34,11 +34,15 @@ pnpm build
 pnpm start
 ```
 
-### with Docker Compose
+### with Podman (or Docker)
 
 ```bash
-docker compose up --build coderunbot
+podman build -t coderunbot discord
+podman run --rm --env-file coderunbot.env coderunbot
 ```
+
+Add `-v ./discord/data:/app/data` to persist the opt-out list across runs
+when using the default local state backend.
 
 ## How to run (gaato bot)
 
@@ -49,13 +53,15 @@ cd discord
 GAATO_BOT=1 pnpm start
 ```
 
-With Docker Compose, run `docker compose up --build gaato-bot` instead.
+With Podman, add `-e GAATO_BOT=1` to the `podman run` command instead.
 
 ## For developer
 
 Pull requests are welcome.
 Please use [pnpm](https://pnpm.io/) to manage dependencies.
 Do not rewrite `pnpm-lock.yaml` by hand.
+TypeScript is pinned to the 6.x line because dependency-cruiser 18 does not
+support TypeScript 7 yet.
 
 ## Environment
 
