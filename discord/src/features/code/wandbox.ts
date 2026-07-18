@@ -1,3 +1,7 @@
+/**
+ * Adapts Wandbox compiler discovery and execution for the code feature.
+ * The adapter is discord.js-free and unit-tested directly.
+ */
 import type { AppLogger } from "../../shared/logger.js";
 
 const LIST_URL = "https://wandbox.org/api/list.json";
@@ -11,6 +15,8 @@ const NIM_COMPILER_OPTIONS = [
   "--hint[SuccessX]:off",
 ].join("\n");
 
+// Dynamic selection broke twice: an API format changed, then a HEAD compiler won the heuristic.
+// Prefer known compiler pins and fall back to a non-development candidate when a pin disappears.
 export const PINNED_COMPILERS: Readonly<Record<string, string>> = {
   python: "cpython-3.14.0",
   "c++": "gcc-13.2.0",
@@ -109,6 +115,7 @@ export function normalizeLanguageKey(language: string): string {
 }
 
 export function parseCompilerList(value: unknown): WandboxCompiler[] {
+  // Guard the remote schema so an upstream format change produces a typed, loud failure.
   if (!Array.isArray(value)) {
     throw new WandboxSchemaError("Wandbox compiler list is not an array");
   }
@@ -174,6 +181,7 @@ export function resolveCompilerFromList(
 }
 
 function parseCompileResult(value: unknown): WandboxCompileResult {
+  // Apply the same schema guard to compile output so response changes fail loudly.
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new WandboxSchemaError("Wandbox compile result is not an object");
   }
@@ -203,6 +211,7 @@ export class WandboxClient {
   readonly #now: () => number;
   readonly #cacheTtlMs: number;
   #compilers: WandboxCompiler[] = [];
+  // The compiler-list cache refreshes on a TTL rather than on every command.
   #lastRefreshAttempt = Number.NEGATIVE_INFINITY;
   #refreshing?: Promise<void>;
 
@@ -343,6 +352,7 @@ export class WandboxClient {
         }
       }
     } catch (error) {
+      // A failed refresh leaves #compilers untouched so commands can use stale valid data.
       if (error instanceof WandboxSchemaError) {
         this.#logger.error(
           { error },

@@ -1,3 +1,6 @@
+/**
+ * Defines bot profiles used by the composition root to select features and defaults.
+ */
 import type { BotName } from "./env.js";
 import type { FeatureId } from "./types.js";
 

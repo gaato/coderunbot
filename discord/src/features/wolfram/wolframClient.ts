@@ -1,3 +1,7 @@
+/**
+ * Adapts Wolfram|Alpha HTTP responses into feature-domain query results.
+ * The adapter is discord.js-free and unit-tested directly.
+ */
 const WOLFRAM_QUERY_URL = "http://api.wolframalpha.com/v2/query";
 
 export interface WolframImage {

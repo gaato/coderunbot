@@ -1,3 +1,6 @@
+/**
+ * Normalizes Discord interactions and messages into the platform's request context.
+ */
 import type {
   ButtonInteraction,
   ChatInputCommandInteraction,

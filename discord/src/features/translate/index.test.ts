@@ -1,3 +1,6 @@
+/**
+ * Tests translation-language autocomplete and resolution without Discord transport calls.
+ */
 import { describe, expect, it } from "vitest";
 import { autocompleteLanguages, resolveLanguage } from "./index.js";
 

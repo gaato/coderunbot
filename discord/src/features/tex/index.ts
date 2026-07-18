@@ -1,3 +1,6 @@
+/**
+ * Defines TeX feature commands and delegates rendering to the Discord-free adapter.
+ */
 import {
   ActionRowBuilder,
   ModalBuilder,
@@ -92,6 +95,7 @@ export function createTexFeature(_dependencies: FeatureDependencies): Feature {
             .addComponents(
               new ActionRowBuilder<TextInputBuilder>().addComponents(input),
             );
+          // Discord accepts a modal only as the interaction's first response.
           await interaction.showModal(modal);
           return undefined;
         },
@@ -102,6 +106,7 @@ export function createTexFeature(_dependencies: FeatureDependencies): Feature {
         const [, spoilerValue] = interaction.customId.split(":");
         const spoiler = spoilerValue === "true";
         const latex = interaction.fields.getTextInputValue("latex");
+        // Acknowledge within Discord's three-second interaction window before rendering.
         await interaction.deferReply();
         return renderReply(latex, spoiler, context.locale);
       },

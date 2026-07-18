@@ -1,3 +1,6 @@
+/**
+ * Supplies a small feature-layer smoke test through a Discord slash command.
+ */
 import { SlashCommandBuilder } from "discord.js";
 import { successContainer } from "../../platform/discord/components.js";
 import type { Feature, FeatureDependencies } from "../../types.js";

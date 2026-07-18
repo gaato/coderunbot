@@ -1,3 +1,6 @@
+/**
+ * Defines the code-execution feature and its Discord command entry points.
+ */
 import {
   ActionRowBuilder,
   ApplicationCommandType,
@@ -97,6 +100,7 @@ export function createCodeFeature(dependencies: FeatureDependencies): Feature {
               new ActionRowBuilder<TextInputBuilder>().addComponents(code),
               new ActionRowBuilder<TextInputBuilder>().addComponents(stdin),
             );
+          // Discord accepts a modal only as the interaction's first response.
           await interaction.showModal(modal);
           return undefined;
         },
@@ -108,6 +112,7 @@ export function createCodeFeature(dependencies: FeatureDependencies): Feature {
             wandbox
               .getLanguageChoices()
               .filter(({ value }) => value.startsWith(focused))
+              // Discord caps autocomplete responses at 25 choices.
               .slice(0, 25),
           );
         },
@@ -135,6 +140,7 @@ export function createCodeFeature(dependencies: FeatureDependencies): Feature {
         );
         const code = interaction.fields.getTextInputValue("code");
         const stdin = interaction.fields.getTextInputValue("stdin");
+        // Acknowledge within Discord's three-second interaction window before remote work.
         await interaction.deferReply();
         return runCode(wandbox, languageKey, code, stdin, context.locale);
       },

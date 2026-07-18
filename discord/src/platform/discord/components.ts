@@ -1,3 +1,6 @@
+/**
+ * Builds reusable Discord Components V2 presentation primitives for the platform layer.
+ */
 import {
   ActionRowBuilder,
   AttachmentBuilder,
@@ -51,6 +54,7 @@ export function textComponent(
   filename = "output.txt",
 ): TextComponentResult {
   const lineCount = text.length === 0 ? 0 : text.split("\n").length;
+  // Components V2 caps total text at 4,000 characters, so >1,000 chars or >100 lines use a file.
   if (
     text.length > TEXT_FILE_CHARACTER_LIMIT ||
     lineCount > TEXT_FILE_LINE_LIMIT

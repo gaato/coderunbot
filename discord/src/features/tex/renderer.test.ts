@@ -1,3 +1,6 @@
+/**
+ * Exercises the discord.js-free TeX rendering adapter against SVG, PNG, and error cases.
+ */
 import { describe, expect, it } from "vitest";
 import { renderTexToPng, renderTexToSvg, TexRenderError } from "./renderer.js";
 

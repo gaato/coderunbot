@@ -1,3 +1,6 @@
+/**
+ * Implements the miscellaneous mention-response feature over Discord and OpenAI.
+ */
 import type { Message } from "discord.js";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
@@ -52,6 +55,7 @@ export async function fetchRecentHistory(
   limit = 10,
 ): Promise<ChatCompletionMessageParam[]> {
   const fetched = await message.channel.messages.fetch({ limit });
+  // Opted-out users' messages must never enter the OpenAI conversation context.
   return [...fetched.values()]
     .reverse()
     .filter((entry) => !optOutUsers.has(entry.author.id))
@@ -80,6 +84,7 @@ export function createMiscFeature(
       if (
         message.author.bot ||
         botUser === null ||
+        // Parsed mentions avoid the old bot's false positives from substring-matching its ID.
         !message.mentions.has(botUser) ||
         !limiter.allow(message.author.id)
       ) {
@@ -87,6 +92,7 @@ export function createMiscFeature(
       }
 
       if ("sendTyping" in message.channel) {
+        // Messages use typing for feedback; interactions must ack within three seconds instead.
         await message.channel.sendTyping();
       }
       const history = await fetchRecentHistory(
@@ -109,6 +115,8 @@ export function createMiscFeature(
           ...history,
         ],
       });
+      // Replies directly instead of returning an OutgoingReply, matching the old bot:
+      // chat responses get no Delete button and no edit-follow tracking.
       await message.reply({
         content: response.choices[0]?.message.content ?? "",
         allowedMentions: { parse: [], repliedUser: true },

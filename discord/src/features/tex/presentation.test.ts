@@ -1,3 +1,6 @@
+/**
+ * Verifies TeX input cleanup, hints, and Discord presentation payloads.
+ */
 import { ContainerBuilder } from "discord.js";
 import { describe, expect, it } from "vitest";
 import { getFixedT } from "../../shared/i18n.js";

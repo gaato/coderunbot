@@ -1,3 +1,6 @@
+/**
+ * Verifies the shared bounded map's validation and oldest-entry eviction behavior.
+ */
 import { describe, expect, it } from "vitest";
 import { LimitedSizeMap } from "./limitedMap.js";
 

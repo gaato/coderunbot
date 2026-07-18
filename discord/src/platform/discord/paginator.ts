@@ -1,3 +1,6 @@
+/**
+ * Adds process-local, collector-driven pagination to platform reply components.
+ */
 import { randomUUID } from "node:crypto";
 import {
   ActionRowBuilder,
@@ -62,6 +65,8 @@ export function paginatedReply(options: PaginatorOptions): OutgoingReply {
     throw new Error("paginator requires at least one page");
   }
 
+  // The collector owns pg: interactions, so the reserved namespace bypasses the central router.
+  // Page state lives only in this process; after a restart, old buttons stop working by design.
   const token = randomUUID();
   let pageIndex = 0;
   const messageComponents = (disabled = false) => [
@@ -77,6 +82,7 @@ export function paginatedReply(options: PaginatorOptions): OutgoingReply {
       navigationRow(token, 0, options.pages.length),
     ],
     async onDelivered(message) {
+      // A message-scoped collector keeps each paginator's mutable page index out of the router.
       const collector = message.createMessageComponentCollector({
         componentType: ComponentType.Button,
         filter: (interaction) =>

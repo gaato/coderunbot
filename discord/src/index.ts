@@ -1,3 +1,7 @@
+/**
+ * Composes the selected bot profile, shared services, features, and Discord platform router.
+ * This is the application's single composition root.
+ */
 import { Client, GatewayIntentBits, Partials, REST } from "discord.js";
 import { getBotProfile } from "./config.js";
 import { loadEnv } from "./env.js";

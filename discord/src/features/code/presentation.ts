@@ -1,3 +1,6 @@
+/**
+ * Translates code feature results into Discord reply values at the feature boundary.
+ */
 import {
   type AttachmentBuilder,
   ContainerBuilder,

@@ -1,3 +1,7 @@
+/**
+ * Adapts local files or S3-compatible storage to the shared opt-out state contract.
+ * The adapter is discord.js-free and unit-tested directly.
+ */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import {
@@ -55,6 +59,7 @@ export class S3ObjectState implements StateBackend {
       endpoint: options.endpoint,
       region: options.region,
       credentials: options.credentials,
+      // OCI Object Storage exposes an S3 endpoint that requires path-style bucket addressing.
       forcePathStyle: true,
     });
     this.#bucket = options.bucket;
@@ -71,6 +76,7 @@ export class S3ObjectState implements StateBackend {
       if (!isMissingS3Object(error)) {
         throw error;
       }
+      // NoSuchKey represents an uninitialized store, so seed the empty state once.
       await this.write("");
       return "";
     }
@@ -90,7 +96,9 @@ export class S3ObjectState implements StateBackend {
 
 export class OptOutUsers {
   readonly #backend: StateBackend;
+  // Discord snowflakes exceed Number.MAX_SAFE_INTEGER, so user IDs remain strings end to end.
   #users = new Set<string>();
+  // This promise-chain mutex serializes writes within the bot's single writer process.
   #writeChain: Promise<void> = Promise.resolve();
 
   constructor(backend: StateBackend) {

@@ -1,3 +1,6 @@
+/**
+ * Covers mention throttling, parsed-mention gating, and private-history filtering.
+ */
 import type { Message } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import type { FeatureDependencies } from "../../types.js";

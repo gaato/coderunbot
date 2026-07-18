@@ -1,3 +1,6 @@
+/**
+ * Defines contracts shared across features, platform code, and the composition root.
+ */
 import type {
   AutocompleteInteraction,
   BaseMessageOptions,

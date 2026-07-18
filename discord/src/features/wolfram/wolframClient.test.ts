@@ -1,3 +1,6 @@
+/**
+ * Tests the discord.js-free Wolfram adapter's response parsing and schema failures.
+ */
 import { describe, expect, it } from "vitest";
 import { parseWolframResponse, WolframResponseError } from "./wolframClient.js";
 

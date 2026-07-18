@@ -1,3 +1,7 @@
+/**
+ * Delivers feature reply values through Discord and tracks editable message replies.
+ * This platform service applies latest-wins coordination to message edits.
+ */
 import {
   type BaseMessageOptions,
   type InteractionEditReplyOptions,
@@ -70,6 +74,7 @@ const discordReplyTransport: ReplyTransport = {
         content: payload.content,
         components: payload.components,
         files: payload.files,
+        // API v10 accepts an empty attachment set to replace files left by the prior reply.
         attachments: payload.replaceAttachments ? [] : undefined,
         flags: editFlags(payload),
       };
@@ -92,6 +97,7 @@ const discordReplyTransport: ReplyTransport = {
       content: payload.content ?? null,
       components: payload.components,
       files: payload.files,
+      // API v10 attachment replacement needs [] or stale files survive a message edit.
       attachments: [],
       flags: editFlags(payload),
     };
@@ -123,6 +129,7 @@ export type DeliveryResult = "sent" | "edited" | "stale";
 export class ReplyCoordinator {
   readonly #capacity: number;
   readonly #transport: ReplyTransport;
+  // Per-feature caps bound source-message tracking memory in long-running processes.
   readonly #trackers = new Map<FeatureId, LimitedSizeMap<string, ReplyState>>();
 
   constructor(
@@ -136,6 +143,7 @@ export class ReplyCoordinator {
   begin(featureId: FeatureId, sourceMessageId: string): number {
     const tracker = this.#tracker(featureId);
     const current = tracker.get(sourceMessageId);
+    // Each source edit starts a generation; only the latest async invocation may publish.
     const generation = (current?.generation ?? 0) + 1;
     tracker.set(sourceMessageId, { ...current, generation });
     return generation;
@@ -160,6 +168,7 @@ export class ReplyCoordinator {
     const generation = request.generation;
     const tracker = this.#tracker(request.featureId);
     const state = tracker.get(sourceMessageId);
+    // A newer invocation finished or remains in flight, so discard this stale result.
     if (state?.generation !== generation) {
       return "stale";
     }
@@ -178,6 +187,7 @@ export class ReplyCoordinator {
     const reply = await this.#transport.send(request.target, payload);
     const latest = tracker.get(sourceMessageId);
     if (latest?.generation !== generation) {
+      // The generation changed during send; delete the reply that lost the race.
       await this.#transport.delete(reply);
       return "stale";
     }

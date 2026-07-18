@@ -1,3 +1,6 @@
+/**
+ * Registers feature routes and dispatches Discord events in the platform layer.
+ */
 import {
   ApplicationIntegrationType,
   type AutocompleteInteraction,
@@ -66,6 +69,7 @@ function addUnique<Value>(
   value: Value,
   routeType: string,
 ): void {
+  // Registry construction happens in the router constructor, so duplicates fail at startup.
   if (map.has(route)) {
     throw new Error(`duplicate ${routeType} route: ${route}`);
   }
@@ -77,6 +81,7 @@ export function buildRouteRegistry(
 ): RouteRegistry {
   const slash = new Map<string, RegisteredSlash>();
   const prefix = new Map<string, RegisteredPrefix>();
+  // customIds use namespace:...; the first colon-delimited segment selects the route.
   const custom = new Map<string, CustomRoute>();
   const featureIds = new Set<FeatureId>();
 
@@ -129,6 +134,7 @@ export function buildRouteRegistry(
     }
   }
 
+  // Delete handling and collector-based pagination own these platform namespaces.
   for (const reserved of ["delete", "pg"]) {
     if (custom.has(reserved)) {
       throw new Error(`customId namespace is reserved: ${reserved}`);
@@ -224,6 +230,7 @@ export class DiscordRouter {
   async #onReady(client: Client<true>): Promise<void> {
     const body = [...this.#routes.slash.values()].map(({ command }) => ({
       ...command.data.toJSON(),
+      // User-installable apps require both install types and all supported invocation contexts.
       integration_types: [
         ApplicationIntegrationType.GuildInstall,
         ApplicationIntegrationType.UserInstall,
@@ -236,6 +243,7 @@ export class DiscordRouter {
     }));
 
     try {
+      // ClientReady provides the application ID; REST.put bulk-overwrites commands idempotently.
       await this.#rest.put(Routes.applicationCommands(client.application.id), {
         body,
       });
@@ -369,6 +377,8 @@ export class DiscordRouter {
     if (prefixRoute !== undefined && parsed !== undefined) {
       handledFeatures.add(prefixRoute.featureId);
       try {
+        // Messages have no defer API; typing gives feedback while interactions must
+        // acknowledge within three seconds.
         if ("sendTyping" in message.channel) {
           await message.channel.sendTyping();
         }

@@ -1,3 +1,6 @@
+/**
+ * Tests the discord.js-free Wandbox adapter's schema guards, selection, and cache behavior.
+ */
 import { describe, expect, it, vi } from "vitest";
 import {
   languageChoices,

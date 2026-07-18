@@ -1,3 +1,6 @@
+/**
+ * Implements the Wolfram feature and paginates adapter results for Discord.
+ */
 import {
   ContainerBuilder,
   MediaGalleryBuilder,
@@ -66,6 +69,7 @@ export function createWolframFeature(
           if (!interaction.isChatInputCommand()) {
             return undefined;
           }
+          // Acknowledge within Discord's three-second interaction window before the API call.
           await interaction.deferReply();
           return execute(
             interaction.options.getString("query", true),

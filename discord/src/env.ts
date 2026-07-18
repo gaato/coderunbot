@@ -1,3 +1,7 @@
+/**
+ * Loads and validates process configuration at the application's environment boundary.
+ * No other source file reads process.env, as enforced by Biome's noProcessEnv rule.
+ */
 import "dotenv/config";
 
 export type BotName = "coderunbot" | "gaato-bot";
@@ -42,6 +46,7 @@ const DEFAULT_OPENAI_CHAT_MODEL_LITE = "gpt-5-mini";
 const DEFAULT_OPENAI_TRANSLATE_MODEL = "gpt-5-mini";
 
 function nonEmpty(value: string | undefined): string | undefined {
+  // Empty strings count as unset, matching the Python bot's truthiness check for GAATO_BOT.
   return value === undefined || value.trim().length === 0 ? undefined : value;
 }
 

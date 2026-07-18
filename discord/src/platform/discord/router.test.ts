@@ -1,3 +1,6 @@
+/**
+ * Tests startup route validation and prefix parsing in the Discord platform router.
+ */
 import { describe, expect, it } from "vitest";
 import type { Feature } from "../../types.js";
 import { buildRouteRegistry, parsePrefixCommand } from "./router.js";

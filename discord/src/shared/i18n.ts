@@ -1,3 +1,6 @@
+/**
+ * Owns shared translation resources and request-scoped translator creation.
+ */
 import i18next from "i18next";
 
 const resources = {
@@ -142,5 +145,6 @@ await instance.init({
 });
 
 export function getFixedT(locale: string) {
+  // A fixed translator avoids global changeLanguage calls bleeding across concurrent requests.
   return instance.getFixedT(locale);
 }

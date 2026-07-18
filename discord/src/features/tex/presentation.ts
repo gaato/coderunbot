@@ -1,3 +1,6 @@
+/**
+ * Builds Discord reply values from TeX feature results at the presentation boundary.
+ */
 import {
   AttachmentBuilder,
   ContainerBuilder,

@@ -1,3 +1,6 @@
+/**
+ * Exercises latest-wins generations and editable reply reuse in the Discord platform service.
+ */
 import type { MessageEditOptions } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import type { ReplyTarget } from "./context.js";

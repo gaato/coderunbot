@@ -1,3 +1,6 @@
+/**
+ * Implements privacy-policy and opt-out commands in the feature layer.
+ */
 import { readFile } from "node:fs/promises";
 import { SlashCommandBuilder } from "discord.js";
 import { getFixedT } from "../../shared/i18n.js";

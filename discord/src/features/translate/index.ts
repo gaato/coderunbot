@@ -1,3 +1,6 @@
+/**
+ * Implements the translation feature and its Discord presentation over OpenAI.
+ */
 import {
   type AttachmentBuilder,
   ContainerBuilder,
@@ -42,6 +45,7 @@ export function autocompleteLanguages(
     return name.length === 0 ? [] : [{ name, value: normalized }];
   }
 
+  // Discord caps autocomplete responses at 25 choices.
   return languageNames
     .filter((name) => name.toLowerCase().startsWith(normalized))
     .sort(
@@ -130,6 +134,7 @@ export function createTranslateFeature(
           }
 
           const original = interaction.options.getString("text", true);
+          // Acknowledge within Discord's three-second interaction window before the API call.
           await interaction.deferReply();
           const response = await completion.create({
             model: dependencies.env.openAITranslateModel,

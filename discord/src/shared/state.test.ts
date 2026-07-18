@@ -1,3 +1,6 @@
+/**
+ * Tests the discord.js-free state adapters and serialized opt-out persistence directly.
+ */
 import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

@@ -1,3 +1,7 @@
+/**
+ * Converts handler failures into user replies and reports diagnostics through Discord.
+ * This platform service keeps error delivery separate from feature handlers.
+ */
 import {
   AttachmentBuilder,
   type Client,
@@ -57,6 +61,7 @@ export class ErrorPresenter {
 
   async #logToDiscord(invocation: string, error: Error): Promise<void> {
     const stack = error.stack ?? `${error.name}: ${error.message}`;
+    // Try the channel cache, then an API fetch; any lookup or send failure falls back to Pino.
     let channel = this.#client.channels.cache.get(this.#logChannelId);
 
     if (channel === undefined) {

@@ -1,3 +1,6 @@
+/**
+ * Provides a shared insertion-ordered map with a fixed upper bound.
+ */
 export class LimitedSizeMap<Key, Value> implements Iterable<[Key, Value]> {
   readonly #entries = new Map<Key, Value>();
   readonly #capacity: number;

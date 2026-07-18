@@ -1,3 +1,6 @@
+/**
+ * Covers environment parsing at the composition boundary, including local and S3 state modes.
+ */
 import { describe, expect, it } from "vitest";
 import { loadEnv } from "./env.js";
 
