@@ -11,6 +11,7 @@ import { LimitedSizeMap } from "../../shared/limitedMap.js";
 import type { FeatureId, OutgoingReply } from "../../types.js";
 import { deleteButtonRow } from "./components.js";
 import type { ReplyTarget } from "./context.js";
+import { cancelPaginator } from "./paginator.js";
 
 export interface EditableReply {
   edit(options: MessageEditOptions): Promise<unknown>;
@@ -150,7 +151,8 @@ export class ReplyCoordinator {
       request.sourceMessageId === undefined ||
       request.generation === undefined
     ) {
-      await this.#transport.send(request.target, payload);
+      const reply = await this.#transport.send(request.target, payload);
+      await this.#afterDelivery(request.outgoing, reply);
       return "sent";
     }
 
@@ -169,6 +171,7 @@ export class ReplyCoordinator {
         );
       }
       await this.#transport.edit(state.reply, payload);
+      await this.#afterDelivery(request.outgoing, state.reply);
       return "edited";
     }
 
@@ -184,6 +187,7 @@ export class ReplyCoordinator {
       reply,
       kind: request.outgoing.kind,
     });
+    await this.#afterDelivery(request.outgoing, reply);
     return "sent";
   }
 
@@ -225,5 +229,15 @@ export class ReplyCoordinator {
       ephemeral: outgoing.ephemeral ?? false,
       replaceAttachments: true,
     };
+  }
+
+  async #afterDelivery(
+    outgoing: OutgoingReply,
+    reply: EditableReply,
+  ): Promise<void> {
+    if (reply instanceof Message) {
+      cancelPaginator(reply);
+      await outgoing.onDelivered?.(reply);
+    }
   }
 }

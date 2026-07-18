@@ -4,6 +4,29 @@ import { loadEnv } from "./env.js";
 const baseEnv = { CODERUNBOT_TOKEN: "token" };
 
 describe("loadEnv state configuration", () => {
+  it("uses current default OpenAI models", () => {
+    expect(loadEnv(baseEnv)).toMatchObject({
+      openAIChatModel: "gpt-5.2",
+      openAIChatModelLite: "gpt-5-mini",
+      openAITranslateModel: "gpt-5-mini",
+    });
+  });
+
+  it("loads optional gaato feature credentials", () => {
+    expect(
+      loadEnv({
+        GAATO_BOT: "1",
+        GAATO_BOT_TOKEN: "token",
+        WOLFRAM_APPID: "wolfram",
+        OPENAI_API_KEY: "openai",
+      }),
+    ).toMatchObject({
+      botName: "gaato-bot",
+      wolframAppId: "wolfram",
+      openAIApiKey: "openai",
+    });
+  });
+
   it("uses the local state file by default", () => {
     expect(loadEnv(baseEnv).state).toEqual({
       backend: "local",

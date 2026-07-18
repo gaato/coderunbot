@@ -26,12 +26,20 @@ export interface Env {
   readonly logChannelId: string;
   readonly developerId: string;
   readonly supportServerLink: string;
+  readonly wolframAppId?: string;
+  readonly openAIApiKey?: string;
+  readonly openAIChatModel: string;
+  readonly openAIChatModelLite: string;
+  readonly openAITranslateModel: string;
   readonly state: StateEnv;
 }
 
 const DEFAULT_LOG_CHANNEL_ID = "1118867011448078417";
 const DEFAULT_DEVELOPER_ID = "572432137035317249";
 const DEFAULT_SUPPORT_SERVER_LINK = "discord.gg/qRpYRTgvXM";
+const DEFAULT_OPENAI_CHAT_MODEL = "gpt-5.2";
+const DEFAULT_OPENAI_CHAT_MODEL_LITE = "gpt-5-mini";
+const DEFAULT_OPENAI_TRANSLATE_MODEL = "gpt-5-mini";
 
 function nonEmpty(value: string | undefined): string | undefined {
   return value === undefined || value.trim().length === 0 ? undefined : value;
@@ -95,6 +103,14 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     developerId: nonEmpty(source.DEVELOPER_ID) ?? DEFAULT_DEVELOPER_ID,
     supportServerLink:
       nonEmpty(source.SUPPORT_SERVER_LINK) ?? DEFAULT_SUPPORT_SERVER_LINK,
+    wolframAppId: nonEmpty(source.WOLFRAM_APPID),
+    openAIApiKey: nonEmpty(source.OPENAI_API_KEY),
+    openAIChatModel:
+      nonEmpty(source.OPENAI_CHAT_MODEL) ?? DEFAULT_OPENAI_CHAT_MODEL,
+    openAIChatModelLite:
+      nonEmpty(source.OPENAI_CHAT_MODEL_LITE) ?? DEFAULT_OPENAI_CHAT_MODEL_LITE,
+    openAITranslateModel:
+      nonEmpty(source.OPENAI_TRANSLATE_MODEL) ?? DEFAULT_OPENAI_TRANSLATE_MODEL,
     state: loadStateEnv(source),
   };
 }

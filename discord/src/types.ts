@@ -9,6 +9,7 @@ import type {
   ModalSubmitInteraction,
   SlashCommandBuilder,
 } from "discord.js";
+import type { Env } from "./env.js";
 import type { RequestContext } from "./platform/discord/context.js";
 import type { AppLogger } from "./shared/logger.js";
 import type { OptOutUsers } from "./shared/state.js";
@@ -66,13 +67,18 @@ export interface Feature {
 export interface FeatureDependencies {
   readonly optOutUsers: OptOutUsers;
   readonly logger: AppLogger;
+  readonly env: Env;
+  readonly client: import("discord.js").Client;
 }
 
-export type FeatureFactory = (dependencies: FeatureDependencies) => Feature;
+export type FeatureFactory = (
+  dependencies: FeatureDependencies,
+) => Feature | undefined;
 
 interface ReplyBase {
   readonly files?: BaseMessageOptions["files"];
   readonly ephemeral?: boolean;
+  readonly onDelivered?: (message: Message) => void | Promise<void>;
 }
 
 export interface ComponentsV2Reply extends ReplyBase {

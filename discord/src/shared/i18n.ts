@@ -53,6 +53,17 @@ const resources = {
           responsePreview: "Response Preview",
         },
       },
+      wolfram: {
+        errorHeading: "Wolfram|Alpha Error",
+        notUnderstood: "Wolfram|Alpha could not understand that input.",
+        noResults: "Wolfram|Alpha returned no result pages.",
+      },
+      translate: {
+        invalidLanguage:
+          "Invalid language. Enter an ISO 639-1 code or language name.",
+        originalHeading: "Original",
+        translatedHeading: "Translated to {{language}}",
+      },
     },
   },
   ja: {
@@ -107,6 +118,17 @@ const resources = {
             "Wandbox から JSON ではない応答が返されました。サービスの状態を確認して、しばらくしてからもう一度お試しください。",
           responsePreview: "応答のプレビュー",
         },
+      },
+      wolfram: {
+        errorHeading: "Wolfram|Alpha エラー",
+        notUnderstood: "Wolfram|Alpha は、その入力を理解できませんでした。",
+        noResults: "Wolfram|Alpha から結果ページが返されませんでした。",
+      },
+      translate: {
+        invalidLanguage:
+          "無効な言語です。ISO 639-1 の2文字コードまたは言語名を入力してください。",
+        originalHeading: "原文",
+        translatedHeading: "翻訳結果（{{language}}）",
       },
     },
   },

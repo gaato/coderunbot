@@ -2,9 +2,12 @@ import { Client, GatewayIntentBits, Partials, REST } from "discord.js";
 import { getBotProfile } from "./config.js";
 import { loadEnv } from "./env.js";
 import { createCodeFeature } from "./features/code/index.js";
+import { createMiscFeature } from "./features/misc/index.js";
 import { createPingFeature } from "./features/ping/index.js";
 import { createPrivacyFeature } from "./features/privacy/index.js";
 import { createTexFeature } from "./features/tex/index.js";
+import { createTranslateFeature } from "./features/translate/index.js";
+import { createWolframFeature } from "./features/wolfram/index.js";
 import { ErrorPresenter } from "./platform/discord/errorPresenter.js";
 import { ReplyCoordinator } from "./platform/discord/replyCoordinator.js";
 import { DiscordRouter } from "./platform/discord/router.js";
@@ -16,21 +19,15 @@ import {
   S3ObjectState,
   type StateBackend,
 } from "./shared/state.js";
-import type { FeatureFactory, FeatureId } from "./types.js";
+import type { Feature, FeatureFactory, FeatureId } from "./types.js";
 
-function pendingFeature(id: FeatureId): FeatureFactory {
-  return (_dependencies) => ({ id });
-}
-
-// This is the only FeatureId -> concrete factory mapping. The no-op entries are
-// replaced by real factories in subsequent migration steps.
 const featureFactories: Record<FeatureId, FeatureFactory> = {
   tex: createTexFeature,
   code: createCodeFeature,
   privacy: createPrivacyFeature,
-  wolfram: pendingFeature("wolfram"),
-  misc: pendingFeature("misc"),
-  translate: pendingFeature("translate"),
+  wolfram: createWolframFeature,
+  misc: createMiscFeature,
+  translate: createTranslateFeature,
   ping: createPingFeature,
 };
 
@@ -57,8 +54,6 @@ export async function bootstrap(): Promise<void> {
   }
   const optOutUsers = new OptOutUsers(stateBackend);
   await optOutUsers.init();
-  const featureDependencies = { optOutUsers, logger };
-
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
@@ -68,11 +63,29 @@ export async function bootstrap(): Promise<void> {
     ],
     partials: [Partials.Channel, Partials.Message],
   });
+  const featureDependencies = { optOutUsers, logger, env, client };
+  if (env.botName === "gaato-bot") {
+    if (env.wolframAppId === undefined) {
+      logger.warn(
+        { envName: "WOLFRAM_APPID", feature: "wolfram" },
+        "gaato-bot feature disabled because an environment variable is missing",
+      );
+    }
+    if (env.openAIApiKey === undefined) {
+      logger.warn(
+        {
+          envName: "OPENAI_API_KEY",
+          features: ["misc", "translate"],
+        },
+        "gaato-bot features disabled because an environment variable is missing",
+      );
+    }
+  }
   const rest = new REST({ version: "10" }).setToken(env.token);
   const features = [
     ...profile.features.map((id) => featureFactories[id](featureDependencies)),
     featureFactories.ping(featureDependencies),
-  ];
+  ].filter((feature): feature is Feature => feature !== undefined);
 
   for (const feature of features) {
     await feature.init?.();
