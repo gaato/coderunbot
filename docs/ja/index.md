@@ -5,7 +5,7 @@
 この Bot はがーと([@gaato__](https://twitter.com/gaato__))によって作られました．
 
 - 公式 Discord サーバーは[こちら](https://discord.gg/qRpYRTgvXM)
-- [招待リンク](https://discord.com/api/oauth2/authorize?client_id=761428259241328680&permissions=0&scope=bot)
+- [招待リンク](https://discord.com/oauth2/authorize?client_id=761428259241328680)
 
 ## 導入方法
 

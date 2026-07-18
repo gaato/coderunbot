@@ -1,0 +1,55 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/pages.yml"
+      - "discord/config/privacy-policy.md"
+      - "docs/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Assemble the site source
+        # The privacy policy is maintained in discord/config/ because the bot
+        # serves it through /privacy-policy. Copy it into the site at build
+        # time instead of keeping a second copy under docs/.
+        run: |
+          cp -r docs _site_src
+          {
+            printf -- '---\ntitle: Privacy Policy\n---\n\n'
+            cat discord/config/privacy-policy.md
+          } > _site_src/privacy-policy.md
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: _site_src
+          destination: _site
+      - name: Upload the site artifact
+        uses: actions/upload-pages-artifact@v4
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

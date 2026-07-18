@@ -5,7 +5,7 @@
 This bot is made by gaato ([@gaato__](https://twitter.com/gaato__)).
 
 - Official Discord server: [here](https://discord.gg/qRpYRTgvXM)
-- [Invite link](https://discord.com/api/oauth2/authorize?client_id=761428259241328680&permissions=0&scope=bot)
+- [Invite link](https://discord.com/oauth2/authorize?client_id=761428259241328680)
 
 ## Installation
 
