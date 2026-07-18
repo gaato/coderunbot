@@ -2,6 +2,8 @@ import { Client, GatewayIntentBits, Partials, REST } from "discord.js";
 import { getBotProfile } from "./config.js";
 import { loadEnv } from "./env.js";
 import { createPingFeature } from "./features/ping/index.js";
+import { createPrivacyFeature } from "./features/privacy/index.js";
+import { createTexFeature } from "./features/tex/index.js";
 import { ErrorPresenter } from "./platform/discord/errorPresenter.js";
 import { ReplyCoordinator } from "./platform/discord/replyCoordinator.js";
 import { DiscordRouter } from "./platform/discord/router.js";
@@ -22,9 +24,9 @@ function pendingFeature(id: FeatureId): FeatureFactory {
 // This is the only FeatureId -> concrete factory mapping. The no-op entries are
 // replaced by real factories in subsequent migration steps.
 const featureFactories: Record<FeatureId, FeatureFactory> = {
-  tex: pendingFeature("tex"),
+  tex: createTexFeature,
   code: pendingFeature("code"),
-  privacy: pendingFeature("privacy"),
+  privacy: createPrivacyFeature,
   wolfram: pendingFeature("wolfram"),
   misc: pendingFeature("misc"),
   translate: pendingFeature("translate"),
