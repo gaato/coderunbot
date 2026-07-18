@@ -1,183 +1,67 @@
-# Bot の使い方
-
-## 目次
-
-- [はじめに](#はじめに)
-- [コマンド](#コマンド)
-  - [run](#run)
-    - [例](#e1)
-    - [言語一覧](#言語一覧)
-  - [save](#save)
-  - [tex](#tex)
-    - [例](#e2)
-  - [texp](#texp)
-    - [例](#e3)
-  - [stex](#stex)
-  - [stexp](#stexp)
-  - [texpdf](#texpdf)
-    - [例](#e4)
+# CodeRunBot の使い方
 
 ## はじめに
 
 この Bot はがーと([@gaato__](https://twitter.com/gaato__))によって作られました．
 
-公式 Discord サーバーは[こちら](https://discord.gg/qRpYRTgvXM)
+- 公式 Discord サーバーは[こちら](https://discord.gg/qRpYRTgvXM)
+- [招待リンク](https://discord.com/api/oauth2/authorize?client_id=761428259241328680&permissions=0&scope=bot)
+
+## 導入方法
+
+2 つの使い方があります．
+
+- **サーバーに追加**: 招待リンクからサーバーに Bot を追加すると，スラッシュコマンドに加えて
+  `]` プレフィックスのテキストコマンドが使えます．
+- **ユーザーインストール**: 自分のアカウントにアプリとして追加すると，Bot がいないサーバーや
+  DM でもスラッシュコマンド(`/run`,`/tex` など)が使えます．
 
 ## コマンド
 
-### run
+### /run
+
+言語を選ぶ(オートコンプリート対応)とコード入力用のフォームが開きます．
+コードと標準入力を入れて送信すると [Wandbox](https://wandbox.org) で実行されます．
+
+対応言語は Wandbox から動的に取得されるため，オートコンプリートに出るものがすべてです．
+
+### ]run(サーバー専用)
 
 ```
 ]run 言語
 コード
 ```
-であなたのコードを実行します．
 
-なおコードブロックのための "```" は無視されます．
-
-#### 例<a id="e1"></a>
+コードブロックのための ``` は無視されます．
 
 ```
 ]run python
 print('hello')
 ```
 
-#### 言語一覧
+### /tex
 
-- Bash (bash)
-- C (c)
-- C# (c#)
-- CLISP (clisp)
-- CoffeeScript (coffeescript)
-- Crystal (crystal)
-- D (d)
-- Elixir (elixir)
-- Erlang (erlang)
-- F# (f#)
-- Free Pascal (fpc)
-- Go (go)
-- Groovy (groovy)
-- Haskell (haskell)
-- Java (java)
-- JavaScript (javascript)
-- Lazy K (lazyk)
-- Lua (lua)
-- Nim (nim)
-- OCaml (ocaml)
-- OpenSSL (openssl)
-- Perl (perl)
-- PHP (php)
-- Pony (pony)
-- PyPy (pypy)
-- Python (python)
-- R (r)
-- Rill (rill)
-- Ruby (ruby)
-- Rust (rust)
-- Scala (scala)
-- SQL (sql)
-- Swift (swift)
-- TypeScript (typescript)
-- VimScript (vimscript)
+数式入力用のフォームが開きます．`env` オプションで align / gather 環境を選べ，
+`spoiler` オプションでスポイラー画像にできます．
 
-### save
+### ]tex / ]stex(サーバー専用)
 
 ```
-]save 言語
-コード
-```
-であなたのコードを保存します．
-```
-]run saved
-標準入力
-```
-で呼び出せます．
-
-### tex
-
-```
-]tex
-数式コマンド
-```
-であなたの数式コマンドを画像化します．
-
-なおコードブロックのための "```" は無視されます．
-
-LaTeX の数式モード（gather*環境）を使っています．
-
-#### 例<a id="e2"></a>
-
-```
-]tex
-\int_0^1 f(x)\,dx
+]tex x^2 + y^2 = r^2
 ```
 
-### texp
+LaTeX(数式モード)を画像にします．`]stex` はスポイラー画像になります．
 
-```
-]texp
-LaTeXによるテキスト
-```
-であなたの LaTeX テキストを画像化します．
+### メッセージを右クリック → アプリ → escape
 
-なおコードブロックのための "```" は無視されます．
+メッセージの Markdown とメンションをエスケープした生テキストを表示します(自分にのみ表示)．
 
-LaTeX のテキストモードを使っています．
+### /privacy-policy, /opt-out, /opt-in
 
-#### 例<a id="e3"></a>
+プライバシーポリシーの表示と，メッセージ内容の処理のオプトアウト／再開ができます．
+詳しくは[プライバシーポリシー](../../discord/config/privacy-policy.md)を参照してください．
 
-```
-]texp
-実定数$a,b,c$に対して，複素数$x$に関する二次方程式
-\[
-  ax^2+bx+c=0
-\]
-の解は
-\[
-  x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}
-\]
-と表される．
-```
+## 便利な挙動
 
-### stex
-
-```
-]stex
-数式コマンド
-```
-[tex](#tex) コマンドでスポイラーをかけます．
-
-### stexp
-
-```
-]stexp
-LaTeXによるテキスト
-```
-[stex](#stex) + [texp](#texp)
-
-### texpdf
-
-```
-]texpdf
-LaTeX文書
-```
-で LaTeX により PDF を作成します．
-
-#### 例<a id="e4"></a>
-
-```
-]texpdf
-\documentclass[uplatex]{jsarticle}
-\usepackage{amsmath}
-\begin{document}
-実定数$a,b,c$に対して，複素数$x$に関する二次方程式
-\[
-  ax^2+bx+c=0
-\]
-の解は
-\[
-  x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}
-\]
-と表される．
-\end{document}
-```
+- Bot の返信には **Delete ボタン**が付き，コマンドを実行した本人だけが削除できます．
+- `]run` や `]tex` の呼び出しメッセージを**編集すると，Bot の返信も自動で更新**されます．

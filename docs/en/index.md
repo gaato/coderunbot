@@ -1,118 +1,69 @@
-# Bot help
-## Index
-- [Introduction](#Intoroduction)
-- [Commands](#Commands)
-  - [run](#run)
-    - [Example](#e1)
-    - [Languages](#Languages)
-  - [save](#save)
-  - [tex](#tex)
-    - [Example](#e2)
-  - [texp](#texp)
-    - [Example](#e3)
+# How to use CodeRunBot
 
-## Intoroduction
-This Bot is made by Gart ([@gaato__](https://twitter.com/gaato__)).
+## Introduction
 
-[Here](https://discord.gg/qRpYRTgvXM) is the discord server.
+This bot is made by gaato ([@gaato__](https://twitter.com/gaato__)).
+
+- Official Discord server: [here](https://discord.gg/qRpYRTgvXM)
+- [Invite link](https://discord.com/api/oauth2/authorize?client_id=761428259241328680&permissions=0&scope=bot)
+
+## Installation
+
+There are two ways to use the bot.
+
+- **Add to a server**: adds slash commands plus `]`-prefixed text commands.
+- **User install**: add the app to your own account and use the slash commands
+  (`/run`, `/tex`, ...) in DMs and in servers that don't have the bot.
+
 ## Commands
-### run
+
+### /run
+
+Pick a language (with autocomplete) and a form opens for your code and
+standard input. The code runs on [Wandbox](https://wandbox.org).
+
+Supported languages are fetched dynamically from Wandbox — whatever appears in
+the autocomplete is what is available.
+
+### ]run (server only)
+
 ```
 ]run language
 code
 ```
-runs your code.
 
-And the bot ignores "```" for a code block.
-#### Example<a id="e1"></a>
+Code fences (```) are ignored.
+
 ```
 ]run python
 print('hello')
 ```
-#### Languages
-- Bash (bash)
-- C (c)
-- C# (c#)
-- CLISP (clisp)
-- CoffeeScript (coffeescript)
-- Crystal (crystal)
-- D (d)
-- Elixir (elixir)
-- Erlang (erlang)
-- F# (f#)
-- Free Pascal (fpc)
-- Go (go)
-- Groovy (groovy)
-- Haskell (haskell)
-- Java (java)
-- JavaScript (javascript)
-- Lazy K (lazyk)
-- Lua (lua)
-- Nim (nim)
-- OCaml (ocaml)
-- OpenSSL (openssl)
-- Perl (perl)
-- PHP (php)
-- Pony (pony)
-- PyPy (pypy)
-- Python (python)
-- R (r)
-- Rill (rill)
-- Ruby (ruby)
-- Rust (rust)
-- Scala (scala)
-- SQL (sql)
-- Swift (swift)
-- TypeScript (typescript)
-- VimScript (vimscript)
 
-### save
+### /tex
+
+Opens a form for LaTeX input. The `env` option wraps your input in an
+align / gather environment, and `spoiler` posts the image as a spoiler.
+
+### ]tex / ]stex (server only)
+
 ```
-]save language
-code
-```
-saves your code.
-You can call it by sending as follows.
-```
-]run saved
-standard input
+]tex x^2 + y^2 = r^2
 ```
 
-### tex
-```
-]tex
-math commands
-```
-images your math commands.
+Renders LaTeX (math mode) as an image. `]stex` posts it as a spoiler.
 
-And the bot ignores "```" for a code block.
+### Right-click a message → Apps → escape
 
-It uses LaTeX gather* environment.
-#### Example<a id="e2"></a>
-```
-]tex
-\int_0^1 f(x)\,dx
-```
-### texp
-```
-]texp
-LaTeX text
-```
-images your LaTeX text.
+Shows the message content with Markdown and mentions escaped (visible only to you).
 
-And the bot ignores "```" for a code block.
+### /privacy-policy, /opt-out, /opt-in
 
-It uses LaTeX text mode.
-#### Example<a id="e3"></a>
-```
-]texp
-For real constants $a,b,c$ the solution of the quadratic equation
-\[
-  ax^2+bx+c=0
-\]
-for complex number $x$ is
-\[
-  x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}
-\]
-．
-```
+Shows the privacy policy and lets you opt out of / back into message content
+processing. See the [privacy policy](../../discord/config/privacy-policy.md)
+for details.
+
+## Handy behaviors
+
+- Every bot reply has a **Delete button** that only the invoking user can press.
+- If you **edit** the message that invoked `]run` or `]tex`, the bot's reply is
+  updated automatically.
