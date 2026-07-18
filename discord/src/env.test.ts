@@ -34,6 +34,7 @@ describe("loadEnv state configuration", () => {
     expect(loadEnv(baseEnv).state).toEqual({
       backend: "local",
       filePath: "data/opt-out-users.txt",
+      usageStatsFilePath: "data/usage-stats-coderunbot.json",
     });
   });
 
@@ -55,8 +56,22 @@ describe("loadEnv state configuration", () => {
       region: "test-region-1",
       bucket: "state",
       key: "bots/coderunbot/opt-out-users.txt",
+      usageStatsKey: "bots/coderunbot/usage-stats-coderunbot.json",
       accessKeyId: "access-key",
       secretAccessKey: "secret-key",
+    });
+  });
+
+  it("uses a separate usage statistics object for gaato bot", () => {
+    expect(
+      loadEnv({
+        GAATO_BOT: "1",
+        GAATO_BOT_TOKEN: "token",
+      }).state,
+    ).toEqual({
+      backend: "local",
+      filePath: "data/opt-out-users.txt",
+      usageStatsFilePath: "data/usage-stats-gaato-bot.json",
     });
   });
 

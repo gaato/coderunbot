@@ -16,6 +16,7 @@ import type { Env } from "./env.js";
 import type { RequestContext } from "./platform/discord/context.js";
 import type { AppLogger } from "./shared/logger.js";
 import type { OptOutUsers } from "./shared/state.js";
+import type { UsageStats } from "./shared/usageStats.js";
 
 export type FeatureId =
   | "tex"
@@ -69,6 +70,7 @@ export interface Feature {
 
 export interface FeatureDependencies {
   readonly optOutUsers: OptOutUsers;
+  readonly usageStats: UsageStats;
   readonly logger: AppLogger;
   readonly env: Env;
   readonly client: import("discord.js").Client;

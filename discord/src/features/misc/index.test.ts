@@ -43,9 +43,11 @@ describe("misc mention response", () => {
       choices: [{ message: { content: "short answer" } }],
     });
     const completion = { create } as ChatCompletionClient;
+    const recordCommand = vi.fn();
     const dependencies = {
       client: { user: { id: "bot" } },
       optOutUsers: { has: (id: string) => id === "opted-out" },
+      usageStats: { recordCommand },
       env: {
         openAIApiKey: "key",
         developerId: "developer",
@@ -71,5 +73,6 @@ describe("misc mention response", () => {
       content: "short answer",
       allowedMentions: { parse: [], repliedUser: true },
     });
+    expect(recordCommand).toHaveBeenCalledWith("mention", "misc", "ok");
   });
 });

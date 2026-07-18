@@ -1,5 +1,5 @@
 /**
- * Adapts local files or S3-compatible storage to the shared opt-out state contract.
+ * Adapts local files or S3-compatible storage to the shared persistent state contract.
  * The adapter is discord.js-free and unit-tested directly.
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";

@@ -8,7 +8,8 @@ export type BotName = "coderunbot" | "gaato-bot";
 
 export interface LocalStateEnv {
   readonly backend: "local";
-  readonly filePath: "data/opt-out-users.txt";
+  readonly filePath: string;
+  readonly usageStatsFilePath: string;
 }
 
 export interface S3StateEnv {
@@ -17,6 +18,7 @@ export interface S3StateEnv {
   readonly region: string;
   readonly bucket: string;
   readonly key: string;
+  readonly usageStatsKey: string;
   readonly accessKeyId: string;
   readonly secretAccessKey: string;
 }
@@ -50,10 +52,14 @@ function nonEmpty(value: string | undefined): string | undefined {
   return value === undefined || value.trim().length === 0 ? undefined : value;
 }
 
-function loadStateEnv(source: NodeJS.ProcessEnv): StateEnv {
+function loadStateEnv(source: NodeJS.ProcessEnv, botName: BotName): StateEnv {
   const backend = nonEmpty(source.BOT_STATE_BACKEND) ?? "local";
   if (backend === "local") {
-    return { backend, filePath: "data/opt-out-users.txt" };
+    return {
+      backend,
+      filePath: "data/opt-out-users.txt",
+      usageStatsFilePath: `data/usage-stats-${botName}.json`,
+    };
   }
   if (backend !== "s3") {
     throw new Error('BOT_STATE_BACKEND must be either "local" or "s3"');
@@ -86,6 +92,10 @@ function loadStateEnv(source: NodeJS.ProcessEnv): StateEnv {
     bucket: required.S3_BUCKET as string,
     key:
       prefix.length > 0 ? `${prefix}/opt-out-users.txt` : "opt-out-users.txt",
+    usageStatsKey:
+      prefix.length > 0
+        ? `${prefix}/usage-stats-${botName}.json`
+        : `usage-stats-${botName}.json`,
     accessKeyId: required.S3_ACCESS_KEY_ID as string,
     secretAccessKey: required.S3_SECRET_ACCESS_KEY as string,
   };
@@ -93,6 +103,7 @@ function loadStateEnv(source: NodeJS.ProcessEnv): StateEnv {
 
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   const gaatoBot = nonEmpty(source.GAATO_BOT) !== undefined;
+  const botName = gaatoBot ? "gaato-bot" : "coderunbot";
   const tokenEnvName = gaatoBot ? "GAATO_BOT_TOKEN" : "CODERUNBOT_TOKEN";
   const token = nonEmpty(source[tokenEnvName]);
 
@@ -101,7 +112,7 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   }
 
   return {
-    botName: gaatoBot ? "gaato-bot" : "coderunbot",
+    botName,
     token,
     tokenEnvName,
     logChannelId: nonEmpty(source.LOG_CHANNEL_ID) ?? DEFAULT_LOG_CHANNEL_ID,
@@ -116,6 +127,6 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
       nonEmpty(source.OPENAI_CHAT_MODEL_LITE) ?? DEFAULT_OPENAI_CHAT_MODEL_LITE,
     openAITranslateModel:
       nonEmpty(source.OPENAI_TRANSLATE_MODEL) ?? DEFAULT_OPENAI_TRANSLATE_MODEL,
-    state: loadStateEnv(source),
+    state: loadStateEnv(source, botName),
   };
 }

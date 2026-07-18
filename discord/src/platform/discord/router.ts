@@ -19,6 +19,7 @@ import {
 } from "discord.js";
 import type { BotProfile } from "../../config.js";
 import type { AppLogger } from "../../shared/logger.js";
+import type { UsageStats } from "../../shared/usageStats.js";
 import type {
   ComponentHandler,
   Feature,
@@ -183,6 +184,7 @@ export interface DiscordRouterOptions {
   readonly replyCoordinator: ReplyCoordinator;
   readonly errorPresenter: ErrorPresenter;
   readonly logger: AppLogger;
+  readonly usageStats?: UsageStats;
   readonly messageGate?: MessageGate;
 }
 
@@ -195,6 +197,7 @@ export class DiscordRouter {
   readonly #replyCoordinator: ReplyCoordinator;
   readonly #errorPresenter: ErrorPresenter;
   readonly #logger: AppLogger;
+  readonly #usageStats?: UsageStats;
   readonly #messageGate: MessageGate;
 
   constructor(options: DiscordRouterOptions) {
@@ -206,6 +209,7 @@ export class DiscordRouter {
     this.#replyCoordinator = options.replyCoordinator;
     this.#errorPresenter = options.errorPresenter;
     this.#logger = options.logger;
+    this.#usageStats = options.usageStats;
     this.#messageGate = options.messageGate ?? (() => true);
   }
 
@@ -225,9 +229,16 @@ export class DiscordRouter {
     this.#client.on(Events.MessageDelete, (message) => {
       void this.#replyCoordinator.deleteReplies(message.id);
     });
+    this.#client.on(Events.GuildCreate, () => {
+      this.#usageStats?.recordGuildCount(this.#client.guilds.cache.size);
+    });
+    this.#client.on(Events.GuildDelete, () => {
+      this.#usageStats?.recordGuildCount(this.#client.guilds.cache.size);
+    });
   }
 
   async #onReady(client: Client<true>): Promise<void> {
+    this.#usageStats?.recordGuildCount(client.guilds.cache.size);
     const body = [...this.#routes.slash.values()].map(({ command }) => ({
       ...command.data.toJSON(),
       // User-installable apps require both install types and all supported invocation contexts.
@@ -291,8 +302,15 @@ export class DiscordRouter {
       interaction,
       this.#profile.defaultLocale,
     );
-    await this.#invoke(route.featureId, context, interaction.toString(), () =>
-      route.command.execute(interaction, context),
+    await this.#invoke(
+      route.featureId,
+      context,
+      interaction.toString(),
+      () => route.command.execute(interaction, context),
+      {
+        kind: interaction.isChatInputCommand() ? "slash" : "context-menu",
+        name: interaction.commandName,
+      },
     );
   }
 
@@ -344,8 +362,12 @@ export class DiscordRouter {
       interaction,
       this.#profile.defaultLocale,
     );
-    await this.#invoke(route.featureId, context, interaction.customId, () =>
-      route.handler(interaction, context),
+    await this.#invoke(
+      route.featureId,
+      context,
+      interaction.customId,
+      () => route.handler(interaction, context),
+      { kind: "button", name: namespace },
     );
   }
 
@@ -359,8 +381,12 @@ export class DiscordRouter {
       interaction,
       this.#profile.defaultLocale,
     );
-    await this.#invoke(route.featureId, context, interaction.customId, () =>
-      route.handler(interaction, context),
+    await this.#invoke(
+      route.featureId,
+      context,
+      interaction.customId,
+      () => route.handler(interaction, context),
+      { kind: "modal", name: namespace },
     );
   }
 
@@ -390,6 +416,7 @@ export class DiscordRouter {
         context,
         message.content,
         () => prefixRoute.command.execute(message, parsed.args, context),
+        { kind: "prefix", name: prefixRoute.command.name },
       );
     }
 
@@ -419,10 +446,11 @@ export class DiscordRouter {
     context: RequestContext,
     invocation: string,
     handler: () => ReturnType<PrefixCommand["execute"]>,
+    stat?: { readonly kind: string; readonly name: string },
   ): Promise<void> {
     const sourceMessageId = (context.replyTarget as Message).id;
     const generation = this.#replyCoordinator.begin(featureId, sourceMessageId);
-    await this.#invoke(featureId, context, invocation, handler, {
+    await this.#invoke(featureId, context, invocation, handler, stat, {
       sourceMessageId,
       generation,
     });
@@ -433,6 +461,7 @@ export class DiscordRouter {
     context: RequestContext,
     invocation: string,
     handler: () => ReturnType<PrefixCommand["execute"]>,
+    stat?: { readonly kind: string; readonly name: string },
     tracking?: {
       readonly sourceMessageId: string;
       readonly generation: number;
@@ -441,6 +470,9 @@ export class DiscordRouter {
     try {
       const outgoing = await handler();
       if (outgoing === undefined) {
+        if (stat !== undefined) {
+          this.#usageStats?.recordCommand(stat.kind, stat.name, "ok");
+        }
         return;
       }
       await this.#replyCoordinator.deliver({
@@ -450,7 +482,13 @@ export class DiscordRouter {
         outgoing,
         ...tracking,
       });
+      if (stat !== undefined) {
+        this.#usageStats?.recordCommand(stat.kind, stat.name, "ok");
+      }
     } catch (error) {
+      if (stat !== undefined) {
+        this.#usageStats?.recordCommand(stat.kind, stat.name, "error");
+      }
       try {
         const outgoing = await this.#errorPresenter.present(
           error,

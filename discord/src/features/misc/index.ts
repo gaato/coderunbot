@@ -121,6 +121,7 @@ export function createMiscFeature(
         content: response.choices[0]?.message.content ?? "",
         allowedMentions: { parse: [], repliedUser: true },
       });
+      dependencies.usageStats.recordCommand("mention", "misc", "ok");
       return undefined;
     },
   };

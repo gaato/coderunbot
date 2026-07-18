@@ -21,6 +21,10 @@ Gakuto Furuya (gaato.)
 - **Error logs**: when a command fails unexpectedly, the invoking command text
   and the internal error trace are posted to a private developer-only Discord
   channel for debugging.
+- **Usage statistics**: anonymous aggregate counters — which command was used,
+  whether it succeeded, the language chosen for `/run`, and the number of servers
+  the bot is in — are stored in cloud object storage. These counters contain no
+  user IDs, no server IDs, and no message content.
 
 ## Third-party services
 

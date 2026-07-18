@@ -12,6 +12,7 @@ import {
   TextInputStyle,
 } from "discord.js";
 import { getFixedT } from "../../shared/i18n.js";
+import type { UsageStats } from "../../shared/usageStats.js";
 import type {
   Feature,
   FeatureDependencies,
@@ -63,6 +64,7 @@ export function createCodeFeature(dependencies: FeatureDependencies): Feature {
           const input = parsePrefixRunInput(args);
           return runCode(
             wandbox,
+            dependencies.usageStats,
             input.languageKey,
             input.code,
             "",
@@ -142,7 +144,14 @@ export function createCodeFeature(dependencies: FeatureDependencies): Feature {
         const stdin = interaction.fields.getTextInputValue("stdin");
         // Acknowledge within Discord's three-second interaction window before remote work.
         await interaction.deferReply();
-        return runCode(wandbox, languageKey, code, stdin, context.locale);
+        return runCode(
+          wandbox,
+          dependencies.usageStats,
+          languageKey,
+          code,
+          stdin,
+          context.locale,
+        );
       },
     },
   };
@@ -150,6 +159,7 @@ export function createCodeFeature(dependencies: FeatureDependencies): Feature {
 
 async function runCode(
   wandbox: WandboxClient,
+  usageStats: Pick<UsageStats, "recordRunLanguage">,
   languageKey: string,
   code: string,
   stdin: string,
@@ -160,6 +170,7 @@ async function runCode(
   if (resolution === undefined) {
     return supportedLanguagesReply(wandbox.getLanguageChoices(), t);
   }
+  usageStats.recordRunLanguage(languageKey);
 
   try {
     const result = await wandbox.compile(resolution.compiler, code, stdin);

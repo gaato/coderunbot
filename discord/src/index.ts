@@ -23,6 +23,7 @@ import {
   S3ObjectState,
   type StateBackend,
 } from "./shared/state.js";
+import { UsageStats } from "./shared/usageStats.js";
 import type { Feature, FeatureFactory, FeatureId } from "./types.js";
 
 const featureFactories: Record<FeatureId, FeatureFactory> = {
@@ -42,8 +43,10 @@ export async function bootstrap(): Promise<void> {
   getFixedT(profile.defaultLocale);
 
   let stateBackend: StateBackend;
+  let usageStatsBackend: StateBackend;
   if (env.state.backend === "local") {
     stateBackend = new LocalFileState(env.state.filePath);
+    usageStatsBackend = new LocalFileState(env.state.usageStatsFilePath);
   } else {
     stateBackend = new S3ObjectState({
       endpoint: env.state.endpoint,
@@ -55,9 +58,21 @@ export async function bootstrap(): Promise<void> {
         secretAccessKey: env.state.secretAccessKey,
       },
     });
+    usageStatsBackend = new S3ObjectState({
+      endpoint: env.state.endpoint,
+      region: env.state.region,
+      bucket: env.state.bucket,
+      key: env.state.usageStatsKey,
+      credentials: {
+        accessKeyId: env.state.accessKeyId,
+        secretAccessKey: env.state.secretAccessKey,
+      },
+    });
   }
   const optOutUsers = new OptOutUsers(stateBackend);
   await optOutUsers.init();
+  const usageStats = new UsageStats(usageStatsBackend, { logger });
+  await usageStats.init();
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
@@ -67,7 +82,35 @@ export async function bootstrap(): Promise<void> {
     ],
     partials: [Partials.Channel, Partials.Message],
   });
-  const featureDependencies = { optOutUsers, logger, env, client };
+  let shuttingDown = false;
+  const shutdown = async (): Promise<void> => {
+    if (shuttingDown) {
+      return;
+    }
+    shuttingDown = true;
+    try {
+      await usageStats.dispose();
+    } catch (error) {
+      logger.error({ error }, "Failed to flush usage statistics on shutdown");
+    }
+    // destroy() is async in discord.js v14; await it so the gateway close frame is sent.
+    await client.destroy().catch(() => undefined);
+    process.exit(0);
+  };
+  process.once("SIGTERM", () => {
+    void shutdown();
+  });
+  process.once("SIGINT", () => {
+    void shutdown();
+  });
+
+  const featureDependencies = {
+    optOutUsers,
+    usageStats,
+    logger,
+    env,
+    client,
+  };
   if (env.botName === "gaato-bot") {
     if (env.wolframAppId === undefined) {
       logger.warn(
@@ -110,6 +153,7 @@ export async function bootstrap(): Promise<void> {
     replyCoordinator,
     errorPresenter,
     logger,
+    usageStats,
     messageGate: (message) => !optOutUsers.has(message.author.id),
   });
   router.bind();
