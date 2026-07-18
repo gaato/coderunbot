@@ -12,7 +12,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check src && madge --circular --extensions ts src",
+    "lint": "biome check src && dependency-cruiser --config .dependency-cruiser.cjs --include-only '^src' src && madge --circular --extensions ts src",
     "format": "biome format --write src",
     "test": "vitest run"
   },
@@ -28,7 +28,7 @@
     "dependency-cruiser": "^18.1.0",
     "madge": "^8.0.0",
     "tsx": "^4.23.1",
-    "typescript": "^7.0.2",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   }
 }
