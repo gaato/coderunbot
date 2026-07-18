@@ -10,12 +10,22 @@ describe("TeX renderer", () => {
     );
   });
 
-  it("throws a typed error for invalid TeX", () => {
-    expect(() => renderTexToSvg("\\invalid")).toThrow(TexRenderError);
+  it("throws a typed error for invalid TeX", async () => {
+    await expect(renderTexToSvg("\\frac{1}{")).rejects.toThrow(TexRenderError);
   });
 
-  it("sets the Japanese serif fallback on SVG text nodes", () => {
-    const svg = renderTexToSvg("\\text{日本語}");
+  it("throws a typed error for undefined macros", async () => {
+    await expect(renderTexToSvg("\\notarealmacro")).rejects.toThrow(
+      TexRenderError,
+    );
+  });
+
+  it("reports the original TeX message for invalid input", async () => {
+    await expect(renderTexToSvg("{")).rejects.toThrow(/missing close brace/iu);
+  });
+
+  it("sets the Japanese serif fallback on SVG text nodes", async () => {
+    const svg = await renderTexToSvg("\\text{日本語}");
 
     const textTags = svg.match(/<text\b[^>]*>/gu) ?? [];
     expect(textTags.length).toBeGreaterThan(0);
