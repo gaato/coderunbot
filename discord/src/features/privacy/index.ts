@@ -11,6 +11,10 @@ const privacyPolicyUrl = new URL(
   import.meta.url,
 );
 
+// AGPL-3.0 §13: users interacting with the bot over the network must be offered
+// its Corresponding Source. If you run a modified version, point this at your fork.
+const SOURCE_URL = "https://github.com/gaato/coderunbot";
+
 export function createPrivacyFeature({
   optOutUsers,
 }: FeatureDependencies): Feature {
@@ -28,6 +32,21 @@ export function createPrivacyFeature({
           return {
             kind: "plain",
             content: await readFile(privacyPolicyUrl, "utf8"),
+          };
+        },
+      },
+      {
+        data: new SlashCommandBuilder()
+          .setName("source")
+          .setDescription("Show where to get this bot's source code")
+          .setDescriptionLocalizations({
+            ja: "このボットのソースコードの入手先を表示します",
+          }),
+        async execute(_interaction, context) {
+          const t = getFixedT(context.locale);
+          return {
+            kind: "plain",
+            content: t("privacy.source", { url: SOURCE_URL }),
           };
         },
       },

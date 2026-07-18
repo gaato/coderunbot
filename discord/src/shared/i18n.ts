@@ -12,6 +12,8 @@ const resources = {
         report: "Please report this problem to us: {{supportLink}}",
       },
       privacy: {
+        source:
+          "This bot is free software licensed under the GNU AGPL v3 or later. The full source code is available at {{url}}",
         optOut: {
           already:
             "Your message content is already off-track. To use other commands, please use the /opt-in command.",
@@ -77,6 +79,8 @@ const resources = {
         report: "この問題を報告してください: {{supportLink}}",
       },
       privacy: {
+        source:
+          "このボットは GNU AGPL v3 以降のライセンスで公開されている自由ソフトウェアです。ソースコードはこちら: {{url}}",
         optOut: {
           already:
             "メッセージ内容はすでに処理対象外です。他のコマンドを使用するには /opt-in コマンドを使用してください。",

@@ -49,7 +49,8 @@ keep working, since using them is itself consent to process that input.
 ## Source code
 
 The bots are free software (AGPL-3.0-or-later). The full source code is
-available at <https://github.com/gaato/coderunbot>.
+available at <https://github.com/gaato/coderunbot>, also shown by the
+`/source` command.
 
 ## Data deletion
 
