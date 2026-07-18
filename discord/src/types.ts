@@ -10,6 +10,7 @@ import type {
   SlashCommandBuilder,
 } from "discord.js";
 import type { RequestContext } from "./platform/discord/context.js";
+import type { OptOutUsers } from "./shared/state.js";
 
 export type FeatureId =
   | "tex"
@@ -60,6 +61,12 @@ export interface Feature {
   onMessage?(message: Message, context: RequestContext): HandlerResult;
   init?(): Promise<void>;
 }
+
+export interface FeatureDependencies {
+  readonly optOutUsers: OptOutUsers;
+}
+
+export type FeatureFactory = (dependencies: FeatureDependencies) => Feature;
 
 interface ReplyBase {
   readonly files?: BaseMessageOptions["files"];

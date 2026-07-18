@@ -7,12 +7,16 @@ import { ReplyCoordinator } from "./platform/discord/replyCoordinator.js";
 import { DiscordRouter } from "./platform/discord/router.js";
 import { getFixedT } from "./shared/i18n.js";
 import { createLogger } from "./shared/logger.js";
-import type { Feature, FeatureId } from "./types.js";
-
-type FeatureFactory = () => Feature;
+import {
+  LocalFileState,
+  OptOutUsers,
+  S3ObjectState,
+  type StateBackend,
+} from "./shared/state.js";
+import type { FeatureFactory, FeatureId } from "./types.js";
 
 function pendingFeature(id: FeatureId): FeatureFactory {
-  return () => ({ id });
+  return (_dependencies) => ({ id });
 }
 
 // This is the only FeatureId -> concrete factory mapping. The no-op entries are
@@ -33,6 +37,25 @@ export async function bootstrap(): Promise<void> {
   const logger = createLogger();
   getFixedT(profile.defaultLocale);
 
+  let stateBackend: StateBackend;
+  if (env.state.backend === "local") {
+    stateBackend = new LocalFileState(env.state.filePath);
+  } else {
+    stateBackend = new S3ObjectState({
+      endpoint: env.state.endpoint,
+      region: env.state.region,
+      bucket: env.state.bucket,
+      key: env.state.key,
+      credentials: {
+        accessKeyId: env.state.accessKeyId,
+        secretAccessKey: env.state.secretAccessKey,
+      },
+    });
+  }
+  const optOutUsers = new OptOutUsers(stateBackend);
+  await optOutUsers.init();
+  const featureDependencies = { optOutUsers };
+
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
@@ -44,8 +67,8 @@ export async function bootstrap(): Promise<void> {
   });
   const rest = new REST({ version: "10" }).setToken(env.token);
   const features = [
-    ...profile.features.map((id) => featureFactories[id]()),
-    featureFactories.ping(),
+    ...profile.features.map((id) => featureFactories[id](featureDependencies)),
+    featureFactories.ping(featureDependencies),
   ];
 
   for (const feature of features) {
@@ -67,6 +90,7 @@ export async function bootstrap(): Promise<void> {
     replyCoordinator,
     errorPresenter,
     logger,
+    messageGate: (message) => !optOutUsers.has(message.author.id),
   });
   router.bind();
 
