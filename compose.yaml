@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   coderunbot:
     build: discord
@@ -10,7 +8,4 @@ services:
     env_file: .env
     environment:
       - GAATO_BOT=1
-    restart: unless-stopped
-  tex:
-    build: tex
     restart: unless-stopped
