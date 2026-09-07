@@ -1,5 +1,7 @@
 # CodeRunBot (gaato bot)
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gaato/coderunbot)
+
 ## What is this
 
 ### CodeRunBot
