@@ -1,6 +1,11 @@
 # CodeRunBot (gaato bot)
 
+[![CI](https://github.com/gaato/coderunbot/actions/workflows/ci.yml/badge.svg)](https://github.com/gaato/coderunbot/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/gaato/coderunbot/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/gaato/coderunbot/actions/workflows/codeql-analysis.yml)
+[![Container Images](https://github.com/gaato/coderunbot/actions/workflows/container-images.yml/badge.svg)](https://github.com/gaato/coderunbot/actions/workflows/container-images.yml)
+[![GitHub Pages](https://github.com/gaato/coderunbot/actions/workflows/pages.yml/badge.svg)](https://github.com/gaato/coderunbot/actions/workflows/pages.yml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gaato/coderunbot)
+[![License](https://img.shields.io/github/license/gaato/coderunbot)](LICENSE)
 
 ## What is this
 
