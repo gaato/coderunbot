@@ -52,6 +52,15 @@ describe("resolveCompilerFromList", () => {
     ).toEqual({ compiler: "future-head", source: "heuristic" });
   });
 
+  it("resolves aliases to their target language instead of the aliased Wandbox language", () => {
+    expect(
+      resolveCompilerFromList("CPP", [
+        { name: "gcc-head-pp", language: "CPP" },
+        { name: "gcc-13.2.0", language: "C++" },
+      ]),
+    ).toEqual({ compiler: "gcc-13.2.0", source: "pinned" });
+  });
+
   it("falls back heuristically when a pinned compiler disappears", () => {
     expect(
       resolveCompilerFromList("python", [
@@ -86,7 +95,7 @@ describe("parseCompilerList", () => {
 });
 
 describe("languageChoices", () => {
-  it("preserves display names and uses normalized keys without alias hacks", () => {
+  it("preserves display names and uses normalized keys", () => {
     expect(
       languageChoices([
         { name: "gcc", language: "C++" },
@@ -97,6 +106,15 @@ describe("languageChoices", () => {
       { name: "C++", value: "c++" },
       { name: "Brain Fuck", value: "brainfuck" },
     ]);
+  });
+
+  it("hides languages whose key is an alias", () => {
+    expect(
+      languageChoices([
+        { name: "gcc-head-pp", language: "CPP" },
+        { name: "gcc", language: "C++" },
+      ]),
+    ).toEqual([{ name: "C++", value: "c++" }]);
   });
 });
 

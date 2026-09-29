@@ -39,6 +39,13 @@ export const PINNED_COMPILERS: Readonly<Record<string, string>> = {
   ocaml: "ocaml-5.2.0",
 };
 
+// Wandbox's "CPP" language is the C preprocessor (HEAD-only), but users typing `cpp` mean C++.
+// Aliased keys resolve to their target and are hidden from language choices.
+export const LANGUAGE_ALIASES: Readonly<Record<string, string>> = {
+  cpp: "c++",
+  cxx: "c++",
+};
+
 export interface WandboxCompiler {
   readonly name: string;
   readonly language: string;
@@ -114,6 +121,11 @@ export function normalizeLanguageKey(language: string): string {
   return language.toLowerCase().replaceAll(" ", "");
 }
 
+export function resolveLanguageKey(language: string): string {
+  const key = normalizeLanguageKey(language);
+  return LANGUAGE_ALIASES[key] ?? key;
+}
+
 export function parseCompilerList(value: unknown): WandboxCompiler[] {
   // Guard the remote schema so an upstream format change produces a typed, loud failure.
   if (!Array.isArray(value)) {
@@ -145,6 +157,9 @@ export function languageChoices(
   const choices = new Map<string, LanguageChoice>();
   for (const compiler of compilers) {
     const value = normalizeLanguageKey(compiler.language);
+    if (value in LANGUAGE_ALIASES) {
+      continue;
+    }
     if (!choices.has(value)) {
       choices.set(value, { name: compiler.language, value });
     }
@@ -157,7 +172,7 @@ export function resolveCompilerFromList(
   compilers: readonly WandboxCompiler[],
   pinnedCompilers: Readonly<Record<string, string>> = PINNED_COMPILERS,
 ): CompilerResolution | undefined {
-  const key = normalizeLanguageKey(languageKey);
+  const key = resolveLanguageKey(languageKey);
   const candidates = compilers.filter(
     (compiler) => normalizeLanguageKey(compiler.language) === key,
   );

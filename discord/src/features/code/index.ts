@@ -28,6 +28,7 @@ import {
 } from "./presentation.js";
 import {
   normalizeLanguageKey,
+  resolveLanguageKey,
   WandboxClient,
   WandboxError,
 } from "./wandbox.js";
@@ -185,12 +186,13 @@ export function createCodeFeature(dependencies: FeatureDependencies): Feature {
 async function runCode(
   wandbox: WandboxClient,
   usageStats: Pick<UsageStats, "recordRunLanguage">,
-  languageKey: string,
+  requestedLanguageKey: string,
   code: string,
   stdin: string,
   locale: string,
 ): Promise<OutgoingReply> {
   const t = getFixedT(locale);
+  const languageKey = resolveLanguageKey(requestedLanguageKey);
   const resolution = await wandbox.resolveCompiler(languageKey);
   if (resolution === undefined) {
     return supportedLanguagesReply(wandbox.getLanguageChoices(), t);
