@@ -5,8 +5,9 @@
   "timezone": "Asia/Tokyo",
   "dependencyDashboard": true,
   "lockFileMaintenance": {
+    "description": "Vulnerability PRs only fix direct dependencies; a daily lock file refresh lands transitive fixes within a day.",
     "enabled": true,
-    "schedule": ["before 5am on the first day of the month"]
+    "schedule": ["before 5am"]
   },
   "packageRules": [
     {
