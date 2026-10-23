@@ -4,12 +4,18 @@
   "schedule": ["before 6am on monday"],
   "timezone": "Asia/Tokyo",
   "dependencyDashboard": true,
-  "automerge": false,
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 5am on the first day of the month"]
   },
   "packageRules": [
+    {
+      "description": "Merge non-major updates once CI passes; majors stay manual.",
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest", "lockFileMaintenance"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": false
+    },
     {
       "description": "Group GitHub Actions updates",
       "matchManagers": ["github-actions"],
