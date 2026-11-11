@@ -1,6 +1,7 @@
 /**
  * Exercises the discord.js-free TeX rendering adapter against SVG, PNG, and error cases.
  */
+import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { renderTexToPng, renderTexToSvg, TexRenderError } from "./renderer.js";
 
@@ -11,6 +12,24 @@ describe("TeX renderer", () => {
     expect(png.subarray(0, 8)).toEqual(
       Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     );
+  });
+
+  it.each([
+    ["a relation with <", "a < b"],
+    ["text containing <", "\\text{a<b}"],
+  ])("renders %s to a PNG", async (_label, latex) => {
+    const png = await renderTexToPng(latex);
+
+    expect(png.subarray(0, 4)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  });
+
+  it("shrinks a very long formula to fit the maximum width", async () => {
+    const latex = Array.from({ length: 400 }, (_, i) => `x_{${i}}`).join("+");
+
+    const metadata = await sharp(await renderTexToPng(latex)).metadata();
+
+    expect(metadata.width).toBeLessThanOrEqual(8000 + 2 * 20);
+    expect(metadata.height).toBeLessThan(500);
   });
 
   it("throws a typed error for invalid TeX", async () => {
