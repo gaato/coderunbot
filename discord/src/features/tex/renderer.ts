@@ -107,6 +107,11 @@ const RENDER_PACKAGES = [
 // lacks the glyphs.
 const TEXT_FONT_FAMILY = "Noto Serif CJK JP, serif";
 const PADDING = 20;
+// Formulas are scaled to a fixed height, so a long single-line formula would
+// otherwise grow past sharp's 32767px dimension limit and fail. Wider images
+// are unreadable in Discord anyway, so long formulas shrink to fit instead.
+const TARGET_HEIGHT = 500;
+const MAX_WIDTH = 8000;
 
 const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);
@@ -167,14 +172,17 @@ export async function renderTexToSvg(latex: string): Promise<string> {
   for (const textElement of adaptor.tags(svgElement, "text")) {
     adaptor.setAttribute(textElement, "font-family", TEXT_FONT_FAMILY);
   }
-  return adaptor.outerHTML(svgElement);
+  // librsvg (inside sharp) parses SVG as XML, while outerHTML() follows HTML
+  // rules and leaves "<" unescaped in attribute values such as MathJax's
+  // data-latex="a < b", which librsvg rejects. serializeXML() escapes them.
+  return adaptor.serializeXML(svgElement);
 }
 
 export async function renderTexToPng(latex: string): Promise<Buffer> {
   const svg = await renderTexToSvg(latex);
   const white = { r: 255, g: 255, b: 255 };
   return sharp(Buffer.from(svg))
-    .resize({ height: 500 })
+    .resize({ width: MAX_WIDTH, height: TARGET_HEIGHT, fit: "inside" })
     .flatten({ background: white })
     .extend({
       top: PADDING,
