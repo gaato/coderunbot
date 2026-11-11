@@ -20,6 +20,11 @@ FROM node:26-slim@sha256:5adad64f9a1fca2d51972caa65983634c8a774eb300d72b20f7f2a0
 WORKDIR /app
 
 ENV NODE_ENV=production
+# The cluster runs this image with a read-only root filesystem and a writable
+# /tmp. Without a writable cache directory, fontconfig (used by sharp when a
+# formula contains \text) logs "No writable cache directories" on every render
+# and rescans the CJK fonts on the first one.
+ENV XDG_CACHE_HOME=/tmp/.cache
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-cjk-extra \
