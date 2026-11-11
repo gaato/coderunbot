@@ -26,7 +26,7 @@
       "description": "Keep Node.js type definitions aligned with the production runtime",
       "matchManagers": ["npm"],
       "matchPackageNames": ["@types/node"],
-      "allowedVersions": "<25"
+      "allowedVersions": "<27"
     },
     {
       "description": "Keep TypeScript compatible with the current analysis toolchain",
@@ -35,10 +35,10 @@
       "allowedVersions": "<7"
     },
     {
-      "description": "Keep the container base image on Node.js 24 LTS",
+      "description": "Keep the container base image on Node.js 26 LTS",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["node"],
-      "allowedVersions": "/^24(?:\\.|-|$)/"
+      "allowedVersions": "/^26(?:\\.|-|$)/"
     },
     {
       "description": "Pin container base images by digest",

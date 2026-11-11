@@ -25,7 +25,7 @@ This is a bot for internal use that adds other functions to CodeRunBot. Also, th
 
 ## Requirements
 
-- Node.js >= 24
+- Node.js >= 26
 - [pnpm](https://pnpm.io/)
 
 ## How to run (CodeRunBot)
