@@ -40,7 +40,11 @@ export interface Env {
   readonly state: StateEnv;
 }
 
-const DEFAULT_LOG_CHANNEL_ID = "1118867011448078417";
+// #coderunbot-log, a private channel in the support server that only the
+// developer and CodeRunBot can see. CodeRunBot is already a member of that
+// server, so it can post there without further setup. gaato bot is not, so its
+// deployment sets LOG_CHANNEL_ID to a channel in its own server.
+const DEFAULT_LOG_CHANNEL_ID = "1569969436478148678";
 const DEFAULT_DEVELOPER_ID = "572432137035317249";
 const DEFAULT_SUPPORT_SERVER_LINK = "discord.gg/qRpYRTgvXM";
 const DEFAULT_OPENAI_CHAT_MODEL = "gpt-5.2";
